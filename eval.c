@@ -1,34 +1,49 @@
 #include "eval.h"
 
-double calc(char* eqBegin, int eqLength, double calcPoint)
+double calc(const char* eqBegin, int eqLength, double calcPoint, bool* dziedzina)
 {
-    return (double)eval(eqBegin, eqBegin + eqLength, calcPoint);
+    char begin[eqLength];
+
+    for (int i = 0; i <= eqLength; i++)
+    {
+        begin[i] = *(eqBegin + i);
+    }
+
+    return (double)eval(begin, begin + eqLength, calcPoint, dziedzina);
 }
 
-double eval(char* begin, char* end, double xValue)
+double eval(char* begin, char* end, double xValue, bool* dziedzina)
 {
     if(*begin == '(')
     {
         char* position = NULL;
         char t = findMsign(begin, end, &position);
 
-        if (t == '+') return eval(begin + 1, position, xValue) + eval(position + 1, end - 1, xValue);
-        else if (t == '-') return eval(begin + 1, position, xValue) - eval(position + 1, end - 1, xValue);
-        else if (t == '*') return eval(begin + 1, position, xValue) * eval(position + 1, end - 1, xValue);
+        if (t == '+') return eval(begin + 1, position, xValue, dziedzina) + eval(position + 1, end - 1, xValue, dziedzina);
+        else if (t == '-') return eval(begin + 1, position, xValue, dziedzina) - eval(position + 1, end - 1, xValue, dziedzina);
+        else if (t == '*') return eval(begin + 1, position, xValue, dziedzina) * eval(position + 1, end - 1, xValue, dziedzina);
         else if (t == '/') 
         {
-            double b =  eval(position + 1, end - 1, xValue);
-            if (b == 0) segfault("Nie mozna dzielic przez 0!");
-            return eval(begin + 1, position, xValue) / b;
+            double b =  eval(position + 1, end - 1, xValue, dziedzina);
+            if (b == 0) 
+            {
+                *dziedzina = false;
+                return 0;
+            }
+            return eval(begin + 1, position, xValue, dziedzina) / b;
         }
         else if (t == '^') 
         {
-            double a = eval(begin + 1, position, xValue);
-            double b = eval(position + 1, end - 1, xValue);
-            if(a == 0 && b == 0) segfault("Nieoznaczone wyrazenie 0^0!");
+            double a = eval(begin + 1, position, xValue, dziedzina);
+            double b = eval(position + 1, end - 1, xValue, dziedzina);
+            if(a == 0 && b == 0)
+            {
+                *dziedzina = false;
+                return 0;
+            }
             return pow(a, b);
         }
-        else return eval(begin + 1, end - 1, xValue);
+        else return eval(begin + 1, end - 1, xValue, dziedzina);
     }
 
     if (*begin == 'x') return xValue;
@@ -40,40 +55,53 @@ double eval(char* begin, char* end, double xValue)
 
         char function[10];
 
-        for (int i = 0; i != openBracket - begin; i++)
-        {
-            function[i] = *(begin + i);
-        }
+        for (int i = 0; i != openBracket - begin; i++) function[i] = *(begin + i);
         function[openBracket - begin] = '\0';
 
-        if (strcmp(function, "sin") == 0) return sin(eval(openBracket + 1, end - 1, xValue));
-        else if (strcmp(function, "cos") == 0) return cos(eval(openBracket + 1, end - 1, xValue));
+        if (strcmp(function, "sin") == 0) return sin(eval(openBracket + 1, end - 1, xValue, dziedzina));
+        else if (strcmp(function, "cos") == 0) return cos(eval(openBracket + 1, end - 1, xValue, dziedzina));
         else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) 
         {
-            double a = sin(eval(openBracket + 1, end - 1, xValue));
-            double b = cos(eval(openBracket + 1, end - 1, xValue));
+            double a = sin(eval(openBracket + 1, end - 1, xValue, dziedzina));
+            double b = cos(eval(openBracket + 1, end - 1, xValue, dziedzina));
 
-            if (b == 0) segfault("Nieprawidlowy tangens!");
+            if (b == 0)
+            {
+                *dziedzina = false;
+                return 0;
+            }
             return a / b;
         }
         else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) 
         {
-            double b = sin(eval(openBracket + 1, end - 1, xValue));
-            double a = cos(eval(openBracket + 1, end - 1, xValue));
+            double b = sin(eval(openBracket + 1, end - 1, xValue, dziedzina));
+            double a = cos(eval(openBracket + 1, end - 1, xValue, dziedzina));
 
-            if (b == 0) segfault("Nieprawidlowy cotangens!");
+            if (b == 0) 
+            {
+                *dziedzina = false;
+                return 0;
+            }
             return a / b;
         }
         else if (strcmp(function, "log") == 0) 
         {
-            double a = eval(openBracket + 1, end - 1, xValue);
-            if (a < 0) segfault("Nie istnieje log(a) : a < 0");
+            double a = eval(openBracket + 1, end - 1, xValue, dziedzina);
+            if (a < 0) 
+            {
+                *dziedzina = false;
+                return 0;
+            }
             return log(a);
         }
         else if (strcmp(function, "sqrt") == 0) 
         {
-            double a = eval(openBracket + 1, end - 1, xValue);
-            if (a < 0) segfault("Nie istnieje sqrt(a) : a < 0");
+            double a = eval(openBracket + 1, end - 1, xValue, dziedzina);
+            if (a < 0) 
+            {
+                *dziedzina = false;
+                return 0;
+            }
             return sqrt(a);
         }
         else 
