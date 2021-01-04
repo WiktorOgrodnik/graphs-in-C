@@ -81,14 +81,14 @@ double read_value(char **inp, double xValue)
         if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue));
         else if (strcmp(function, "cos") == 0) n = cos(expression(inp, xValue));
         else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) n = tan(expression(inp, xValue));
-        else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) n = 1/tan(expression(inp, xValue));
+        else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) n = 1 / tan(expression(inp, xValue));
         else if (strcmp(function, "log") == 0 || strcmp(function, "ln") == 0) n = log(expression(inp, xValue));
         else if (strcmp(function, "sqrt") == 0) n = sqrt(expression(inp, xValue));
-        else return nan("BLAD!");
+        else return nan("ERROR!");
 
         if ((c = read_char(inp)) != ')') 
         {
-            return nan("BLAD!");
+            return nan("ERROR!");
             //Normalny blad
         }
         c = NUMBER;
@@ -132,7 +132,7 @@ double ingredient(char **inp, double xValue)
         else
         {
             if (x2) res /= x2;
-            else return nan("BLAD!");
+            else return nan("ERROR!");
         }
     }
 
@@ -151,7 +151,7 @@ double factor(char **inp, double xValue)
         x2 = exponent(inp, xValue);
 
         if (res || x2) res = pow(res, x2);
-        else return nan("BLAD!");
+        else return nan("ERROR!");
         //Uwaga na kolejność wykonywania działań!
         //Do poprawy
     }
@@ -176,13 +176,13 @@ double exponent(char **inp, double xValue)
         {
 	        //sprintf(blad,"BLAD: oczekiwano ')', a wystapil znak: '%c'\n",z);
 	        //pokazBlad(blad);
-            return nan("BLAD");
+            return nan("ERROR!");
         }
     }
     else 
     {
         //sprintf(blad,"BLAD: oczekiwano liczby lub '(', a wystapil znak: '%c'\n",z);
 	    //pokazBlad(blad);
-        return nan("BLAD");
+        return nan("ERROR!");
     }
 }

@@ -210,7 +210,23 @@ static void calculate (GtkWidget *widget, gpointer data_)
 
     for (gint i = 0; i < r; i++) 
     {
-        if (!isnan(wyniki[i])) put_pixel(chartData, i, (gint)(300 - (wyniki[i]) * scale), 0, 0, 255, 255);
+        wyniki[i] = (gint)(300 - (wyniki[i]) * scale);
+
+        if (!isnan(wyniki[i])) put_pixel(chartData, i, wyniki[i], 0, 0, 255, 255);
+
+        if (i && !isnan(wyniki[i]))
+        {
+            gint start = wyniki[i - 1] < wyniki[i] ? (gint)wyniki[i - 1] : (gint)wyniki[i];
+            gint end = wyniki[i - 1] < wyniki[i] ? (gint)wyniki[i] : (gint)wyniki[i - 1];
+
+            if (end - start >= 2 && end - start < 400)
+            {
+                for (gint j = start; j < end; j++)
+                {
+                    put_pixel(chartData, i, j, 0, 0, 255, 255);
+                }
+            }
+        }
     }
     
     gtk_image_set_from_pixbuf(GTK_IMAGE(chart), chartData);
