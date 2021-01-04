@@ -1,6 +1,7 @@
 #include "eval.h"
+#define NUMBER 0
 
-double calc(const char* eqBegin, int eqLength, double calcPoint, bool* dziedzina)
+double calc(const char* eqBegin, int eqLength, double calcPoint)
 {
     char begin[eqLength];
 
@@ -9,149 +10,179 @@ double calc(const char* eqBegin, int eqLength, double calcPoint, bool* dziedzina
         begin[i] = *(eqBegin + i);
     }
 
-    return (double)eval(begin, begin + eqLength, calcPoint, dziedzina);
-}
-
-double eval(char* begin, char* end, double xValue, bool* dziedzina)
-{
-    if(*begin == '(')
+    int c;
+    double result;
+    char* inptr = begin;
+    
+    if ((c = read_char(&inptr)) != EOF) 
     {
-        char* position = NULL;
-        char t = findMsign(begin, end, &position);
+        return_char(c , &inptr);
 
-        if (t == '+') return eval(begin + 1, position, xValue, dziedzina) + eval(position + 1, end - 1, xValue, dziedzina);
-        else if (t == '-') return eval(begin + 1, position, xValue, dziedzina) - eval(position + 1, end - 1, xValue, dziedzina);
-        else if (t == '*') return eval(begin + 1, position, xValue, dziedzina) * eval(position + 1, end - 1, xValue, dziedzina);
-        else if (t == '/') 
-        {
-            double b =  eval(position + 1, end - 1, xValue, dziedzina);
-            if (b == 0) 
-            {
-                *dziedzina = false;
-                return 0;
-            }
-            return eval(begin + 1, position, xValue, dziedzina) / b;
-        }
-        else if (t == '^') 
-        {
-            double a = eval(begin + 1, position, xValue, dziedzina);
-            double b = eval(position + 1, end - 1, xValue, dziedzina);
-            if(a == 0 && b == 0)
-            {
-                *dziedzina = false;
-                return 0;
-            }
-            return pow(a, b);
-        }
-        else return eval(begin + 1, end - 1, xValue, dziedzina);
+        result = expression(&inptr, calcPoint);
     }
 
-    if (*begin == 'x') return xValue;
-    else if (*begin <= 'z' && *begin >= 'a') 
+    return result;
+}
+
+void return_char(int c, char **inp)
+{
+    if (c != EOF && c != NUMBER) --*inp;
+}
+
+int read_char(char **inp)
+{
+    int c;
+    
+    if (**inp == '\0') return EOF;
+
+    while ((c = *(*inp)++) != '\0' && isspace(c));
+
+    if (isdigit(c) || c == '.' || c == ',' || isalpha(c)) 
     {
-        char* openBracket = searchF(begin, end);
+        return_char(c, inp);
+        return NUMBER;
+    }
+    return c == 0 ? EOF : c;
+}
 
-        if (openBracket == NULL) segfault("Syntax error!");
+double read_value(char **inp, double xValue)
+{
+    int c;
+    double n = 0.0, exp10 = 1.0;
 
+    while ((c = *(*inp)++) != '\0' && isdigit(c)) n = 10.0 * n + (c -'0');
+
+    if (c == '.' || c == ',')
+    {
+        while ((c = *(*inp)++) != '\0' && isdigit(c)) 
+        {
+            n = 10.0 * n + (c - '0');
+            exp10 *= 10.0;
+        }
+    }
+    else if(c == 'x') 
+    {
+        n = xValue; 
+        c = *(*inp)++;
+    }
+    else if (isalpha(c))
+    {
+        int it = 1;
         char function[10];
+        function[0] = (char)c;
 
-        for (int i = 0; i != openBracket - begin; i++) function[i] = *(begin + i);
-        function[openBracket - begin] = '\0';
+        while ((c = *(*inp)++) != '\0' && c != '(') 
+        {
+            function[it] = (char)c;
+            it++;
+        }
+        function[it] = '\0';
 
-        if (strcmp(function, "sin") == 0) return sin(eval(openBracket + 1, end - 1, xValue, dziedzina));
-        else if (strcmp(function, "cos") == 0) return cos(eval(openBracket + 1, end - 1, xValue, dziedzina));
-        else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) 
-        {
-            double a = sin(eval(openBracket + 1, end - 1, xValue, dziedzina));
-            double b = cos(eval(openBracket + 1, end - 1, xValue, dziedzina));
+        if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue));
+        else if (strcmp(function, "cos") == 0) n = cos(expression(inp, xValue));
+        else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) n = tan(expression(inp, xValue));
+        else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) n = 1/tan(expression(inp, xValue));
+        else if (strcmp(function, "log") == 0 || strcmp(function, "ln") == 0) n = log(expression(inp, xValue));
+        else if (strcmp(function, "sqrt") == 0) n = sqrt(expression(inp, xValue));
+        else return nan("BLAD!");
 
-            if (b == 0)
-            {
-                *dziedzina = false;
-                return 0;
-            }
-            return a / b;
-        }
-        else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) 
+        if ((c = read_char(inp)) != ')') 
         {
-            double b = sin(eval(openBracket + 1, end - 1, xValue, dziedzina));
-            double a = cos(eval(openBracket + 1, end - 1, xValue, dziedzina));
+            return nan("BLAD!");
+            //Normalny blad
+        }
+        c = NUMBER;
+    }
 
-            if (b == 0) 
-            {
-                *dziedzina = false;
-                return 0;
-            }
-            return a / b;
-        }
-        else if (strcmp(function, "log") == 0) 
+    return_char(c == 0 ? EOF : c, inp);        
+    return n / exp10;
+}
+
+double expression(char **inp, double xValue)
+{
+    int c;
+    double res, x2;
+
+    if ((c = read_char(inp)) != '-' && c != '+') return_char(c, inp);
+
+    res = ingredient(inp, xValue);
+
+    if (c == '-') res = -res;
+
+    while ((c = read_char(inp)) == '+' || c == '-') 
+    {
+        x2 = ingredient(inp, xValue);
+        res = (c == '+' ? res + x2 : res - x2);
+    }
+    return_char(c, inp);        
+    return res;
+}
+
+double ingredient(char **inp, double xValue)
+{
+    int c;
+    double res, x2;
+
+    res = factor(inp, xValue);
+    while ((c = read_char(inp)) == '*' || c == '/') 
+    {
+        x2 = factor(inp, xValue);
+
+        if (c == '*') res *= x2;
+        else
         {
-            double a = eval(openBracket + 1, end - 1, xValue, dziedzina);
-            if (a < 0) 
-            {
-                *dziedzina = false;
-                return 0;
-            }
-            return log(a);
+            if (x2) res /= x2;
+            else return nan("BLAD!");
         }
-        else if (strcmp(function, "sqrt") == 0) 
-        {
-            double a = eval(openBracket + 1, end - 1, xValue, dziedzina);
-            if (a < 0) 
-            {
-                *dziedzina = false;
-                return 0;
-            }
-            return sqrt(a);
-        }
+    }
+
+    return_char(c, inp);        
+    return res;
+}
+
+double factor(char **inp, double xValue)
+{
+    int c;
+    double res, x2;
+
+    res = exponent(inp, xValue);
+    while ((c = read_char(inp)) == '^') 
+    {
+        x2 = exponent(inp, xValue);
+
+        if (res || x2) res = pow(res, x2);
+        else return nan("BLAD!");
+        //Uwaga na kolejność wykonywania działań!
+        //Do poprawy
+    }
+
+    return_char(c, inp);        
+    return res;
+}
+
+double exponent(char **inp, double xValue)
+{
+    int c;
+    double res;
+    //char error[100];
+
+    if ((c = read_char(inp)) == NUMBER) return read_value(inp, xValue);
+    else if (c == '(') 
+    {
+        res = expression(inp, xValue);
+
+        if ((c = read_char(inp)) == ')') return res;
         else 
         {
-            char dest[33] = "";
-            strcat(dest, "Nie istnieje funkcja ");
-            strcat(dest, function);
-            segfault(dest);
+	        //sprintf(blad,"BLAD: oczekiwano ')', a wystapil znak: '%c'\n",z);
+	        //pokazBlad(blad);
+            return nan("BLAD");
         }
     }
-
-    char equation[1000];
-    char* eptr;
-
-    int i;
-    for(i = 0; i < end - begin; i++) equation[i] = *(begin + i);
-    equation[i] = '\0';
-    
-    return strtod(equation, &eptr);
-}
-
-char findMsign(char* begin, char* end, char** position)
-{
-    int openBrackets = 0;
-
-    for (int i = 0; i < end - begin; i++)
+    else 
     {
-        if (*(begin + i) == '(') openBrackets++;
-        else if (*(begin + i) == ')') openBrackets--;
-        else if (*(begin + i) == '+' && openBrackets == 1) {*position = begin + i; return '+';}
-        else if (*(begin + i) == '-' && openBrackets == 1) {if(i!=1){*position = begin + i; return '-';}}
-        else if (*(begin + i) == '*' && openBrackets == 1) {*position = begin + i; return '*';}
-        else if (*(begin + i) == '/' && openBrackets == 1) {*position = begin + i; return '/';}
-        else if (*(begin + i) == '^' && openBrackets == 1) {*position = begin + i; return '^';}
+        //sprintf(blad,"BLAD: oczekiwano liczby lub '(', a wystapil znak: '%c'\n",z);
+	    //pokazBlad(blad);
+        return nan("BLAD");
     }
-
-    return 'T';
-}
-
-char* searchF(char* begin, char* end)
-{
-    int i = 0;
-    while (*(begin + i) != '(' && (begin + i) != end) i++;
-    
-    if ((begin + i) != end) return begin + i;
-    return NULL;
-}
-
-void segfault(char info [])
-{
-    printf("Nieobs\210ugiwany wyj\245tek: %s\n", info);
-    exit(0);
 }

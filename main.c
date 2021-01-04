@@ -5,7 +5,6 @@
 #include "eval.h"
 
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 #define LENGTH 1000
@@ -26,8 +25,6 @@ static void destroy (GtkWidget *widget, gpointer data);
 static void about_run (GtkWidget *widget, gpointer data);
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
 static void calculate (GtkWidget *widget, gpointer data_);
-
-void scan_statement(char* statement);
 
 int main(int argc, char* argv[])
 {
@@ -102,13 +99,7 @@ int main(int argc, char* argv[])
     gtk_widget_show_all(window);
     gtk_main();
 
-    /*char str[LENGTH];
-
-    scan_statement(str);
-
-    printf("%lf", calc(str, strlen(str), 1.0));
-
-    return 0;*/
+    return 0;
 }
 
 static void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
@@ -118,8 +109,8 @@ static void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
         put_pixel(pixbuf, i, 299, 0, 0, 0, 255);
         put_pixel(pixbuf, i, 300, 0, 0, 0, 255);
     }
-    //temp
 
+    //temp
     for (gint i = 0; i < 600; i++)
     {
         put_pixel(pixbuf, 399, i, 0, 0, 0, 255);
@@ -186,7 +177,12 @@ static void calculate (GtkWidget *widget, gpointer data_)
     intervalP = gtk_entry_get_text(GTK_ENTRY(data->intervalP));
     scale_ = gtk_entry_get_text(GTK_ENTRY(data->res));
 
-    l = strtod(intervalL, &eptr); p = strtod(intervalP, &eptr); scale = strtod(scale_, &eptr);
+    if (strcmp(intervalL, "") == 0) l = -10;
+    else l = strtod(intervalL, &eptr); 
+
+    if (strcmp(intervalP, "") == 0) p = 10;
+    p = strtod(intervalP, &eptr); 
+
     r = (gint)800;
     delta = (p - l) / (gdouble)r;
 
@@ -195,13 +191,11 @@ static void calculate (GtkWidget *widget, gpointer data_)
 
     for (gint i = 0; i < r; i++)
     {
-        bool dziedzina = true;
-        double wynik = calc(wejscie, strlen(wejscie), l, &dziedzina);
+        double wynik = calc(wejscie, strlen(wejscie), l);
 
-        if (dziedzina) wyniki[i] = wynik;
-        else wyniki[i] = 800.0;
+        wyniki[i] = wynik;
 
-        if (dziedzina && wynik > max) max = wynik;
+        if (!isnan(wynik) && wynik > max) max = wynik;
         l+=delta;
     }
 
@@ -211,25 +205,13 @@ static void calculate (GtkWidget *widget, gpointer data_)
     max += max * 0.4;
     if (max > 300) max = 300;
 
-    for (gint i = 0; i < r; i++) put_pixel(chartData, i, (gint)(300 - (wyniki[i]) * scale), 0, 0, 255, 255);
+    if (strcmp(scale_, "") == 0) scale = 300 / max;
+    else scale = strtod(scale_, &eptr);
+
+    for (gint i = 0; i < r; i++) 
+    {
+        if (!isnan(wyniki[i])) put_pixel(chartData, i, (gint)(300 - (wyniki[i]) * scale), 0, 0, 255, 255);
+    }
     
     gtk_image_set_from_pixbuf(GTK_IMAGE(chart), chartData);
-
-    //g_print("%lf\n", calc(wejscie, strlen(wejscie), 1.0));
-}
-
-void scan_statement(char* statement)
-{
-    char c = getchar();
-
-    while(isspace(c)) c = getchar();
-
-    while(true)
-    {
-        *statement++ = c;
-        if(c == '\n') break;
-        c = getchar();
-    }
-
-    *(statement - 1) = '\0';
 }

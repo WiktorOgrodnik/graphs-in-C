@@ -5,10 +5,14 @@
 #include <math.h>
 #include <string.h>
 
-double calc(const char* eqBegin, int eqLength, double calcPoint, bool* dziedzina);
+double calc(const char* eqBegin, int eqLength, double calcPoint);
 
-double eval(char* begin, char* end, double xValue, bool* dziedzina);
-char findMsign(char* begin, char* end, char** position);
-char* searchF(char* begin, char* end);
+void return_char(int c, char **inp);
+int read_char(char **inp);
 
-void segfault(char info []);
+double read_value(char **inp, double xValue);
+
+double expression(char **inp, double xValue);
+double ingredient(char **inp, double xValue);
+double factor(char **inp, double xValue);
+double exponent(char **inp, double xValue);
