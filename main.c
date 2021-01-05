@@ -219,7 +219,7 @@ static void calculate (GtkWidget *widget, gpointer data_)
             gint start = wyniki[i - 1] < wyniki[i] ? (gint)wyniki[i - 1] : (gint)wyniki[i];
             gint end = wyniki[i - 1] < wyniki[i] ? (gint)wyniki[i] : (gint)wyniki[i - 1];
 
-            if (end - start >= 2 && end - start < 400)
+            if (end - start >= 2 && end - start < 500)
             {
                 for (gint j = start; j < end; j++)
                 {
