@@ -138,7 +138,7 @@ static void about_run (GtkWidget *widget, gpointer data)
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha)
 {
     int width, height, rowstride, n_channels;
-    guchar *pixels, *p;
+    guchar *pixels, *p; 
 
     n_channels = gdk_pixbuf_get_n_channels (pixbuf);
 
@@ -177,10 +177,10 @@ static void calculate (GtkWidget *widget, gpointer data_)
     intervalP = gtk_entry_get_text(GTK_ENTRY(data->intervalP));
     scale_ = gtk_entry_get_text(GTK_ENTRY(data->res));
 
-    if (strcmp(intervalL, "") == 0) l = -10;
+    if (strcmp(intervalL, "") == 0) l = -10.0;
     else l = strtod(intervalL, &eptr); 
 
-    if (strcmp(intervalP, "") == 0) p = 10;
+    if (strcmp(intervalP, "") == 0) p = 10.0;
     p = strtod(intervalP, &eptr); 
 
     r = (gint)800;
