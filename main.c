@@ -134,12 +134,24 @@ static void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
 {
     for (gint i = 0; i < 800; i++)
     {
+        for (gint j = 0; j < 600; j++)
+        {
+            if (j % 60 == 0 && j) put_pixel(pixbuf, i, j, 0, 0, 0, 127);
+            else if (j % 12 == 0 && j) put_pixel(pixbuf, i, j, 0, 0, 0, 63);
+        }
+
         put_pixel(pixbuf, i, 299, 0, 0, 0, 255);
         put_pixel(pixbuf, i, 300, 0, 0, 0, 255);
     }
 
     for (gint i = 0; i < 600; i++)
     {
+        for (gint j = 0; j < 800; j++)
+        {
+            if (j % 80 == 0 && j) put_pixel(pixbuf, j, i, 0, 0, 0, 127);
+            else if (j % 16 == 0 && j) put_pixel(pixbuf, j, i, 0, 0, 0, 63);
+        }
+
         put_pixel(pixbuf, 399, i, 0, 0, 0, 255);
         put_pixel(pixbuf, 400, i, 0, 0, 0, 255);
     }
@@ -240,15 +252,19 @@ static void calculate (GtkWidget *widget, gpointer data_)
     for (gint i = 0; i < r; i++) 
     {
         wyniki[i] = (gint)(300 - (wyniki[i]) * scale);
+        if (wyniki[i] >= 600) wyniki[i] = 598;
+        else if (wyniki[i] < 0) wyniki[i] = 0;
 
-        if (!isnan(wyniki[i])) put_pixel(chartData, i, wyniki[i], 0, 0, 255, 255);
+        if (!isnan(wyniki[i]) && wyniki[i] >=0 && wyniki[i] <= 600) put_pixel(chartData, i, wyniki[i], 0, 0, 255, 255); 
+
+        //g_print("%d\n", (gint)wyniki[i]);
 
         if (i && !isnan(wyniki[i]))
         {
             gint start = wyniki[i - 1] < wyniki[i] ? (gint)wyniki[i - 1] : (gint)wyniki[i];
             gint end = wyniki[i - 1] < wyniki[i] ? (gint)wyniki[i] : (gint)wyniki[i - 1];
 
-            if (end - start >= 2 && end - start < 500)
+            if (end - start >= 2 && end - start < 400)
             {
                 for (gint j = start; j < end; j++)
                 {
