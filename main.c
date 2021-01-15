@@ -29,7 +29,7 @@ static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green
 static void calculate (GtkWidget *widget, gpointer data_);
 
 void double_to_gchar(gdouble a, int afterpoint, gchar str[]);
-void makeLegend(GtkWidget* chart[], gdouble l, gdouble p, bool axis);
+void makeLegend(GtkWidget* chart[], gdouble delta);
 
 int main(int argc, char* argv[])
 {
@@ -95,8 +95,8 @@ int main(int argc, char* argv[])
         gtk_box_pack_start(GTK_BOX(chartLegendBottom), inputs.chartLegendBottom[i], TRUE, TRUE, 0);
     }
 
-    makeLegend(inputs.chartLegendLeft, -300, 300, 0);
-    makeLegend(inputs.chartLegendBottom, -10, 10, 1);
+    makeLegend(inputs.chartLegendLeft, (gdouble)300 / (gdouble)4);
+    makeLegend(inputs.chartLegendBottom, (gdouble)10 / (gdouble)4);
 
 
     GtkWidget* box2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -138,26 +138,11 @@ static void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
         put_pixel(pixbuf, i, 300, 0, 0, 0, 255);
     }
 
-    gdouble s = l, t = 0.0, delta = (p - l) / 800.0;
-
-    for (gint i = 0; i < 800; i++)
-    {   
-        s += delta;
-
-        if (t * s <= 0 && i)
-        {
-            for (gint j = 0; j < 600; j++)
-            {
-                put_pixel(pixbuf, i - 1, j, 0, 0, 0, 255);
-                put_pixel(pixbuf, i, j, 0, 0, 0, 255);
-            }
-
-            break;
-        }
-
-        t = s;
+    for (gint i = 0; i < 600; i++)
+    {
+        put_pixel(pixbuf, 399, i, 0, 0, 0, 255);
+        put_pixel(pixbuf, 400, i, 0, 0, 0, 255);
     }
-    
 }
 
 static void destroy (GtkWidget *widget, gpointer data) 
@@ -209,26 +194,23 @@ static void calculate (GtkWidget *widget, gpointer data_)
 {
     struct eqData* data = (struct eqData*) data_;
     
-    const gchar* wejscie, *intervalL, *intervalP, *scale_;
+    const gchar* wejscie, *interval, *scale_;
     gchar* eptr;
-    gdouble l, p, delta, scale, lorg;
+    gdouble l, p, delta, scale;
     gint r;
 
     wejscie = gtk_entry_get_text(GTK_ENTRY(data->equation));
-    intervalL = gtk_entry_get_text(GTK_ENTRY(data->intervalL));
-    intervalP = gtk_entry_get_text(GTK_ENTRY(data->intervalP));
+    interval = gtk_entry_get_text(GTK_ENTRY(data->interval));
     scale_ = gtk_entry_get_text(GTK_ENTRY(data->res));
 
-    if (strcmp(intervalL, "") == 0) l = -10.0;
-    else l = strtod(intervalL, &eptr); 
+    if (strcmp(interval, "") == 0) l = 10.0;
+    else l = strtod(interval, &eptr); 
 
-    if (strcmp(intervalP, "") == 0) p = 10.0;
-    p = strtod(intervalP, &eptr); 
+    p = l;
+    l *= -1;
 
     r = (gint)800;
     delta = (p - l) / (gdouble)r;
-
-    lorg = l;
 
     gdouble wyniki[r];
     gdouble max = -800.0;
@@ -252,8 +234,8 @@ static void calculate (GtkWidget *widget, gpointer data_)
     if (strcmp(scale_, "") == 0) scale = 300 / max;
     else scale = strtod(scale_, &eptr);
 
-    makeLegend(data->chartLegendLeft, 0, (300/scale) / 4, 0);
-    makeLegend(data->chartLegendBottom, lorg, p, 1);
+    makeLegend(data->chartLegendLeft, (300/scale) / 4);
+    makeLegend(data->chartLegendBottom, p / 4);
 
     for (gint i = 0; i < r; i++) 
     {
@@ -331,27 +313,8 @@ void double_to_gchar(gdouble a, int afterpoint, gchar str[])
     } 
 }
 
-void makeLegend(GtkWidget* chartLeft[], gdouble l, gdouble p, bool axis)
+void makeLegend(GtkWidget* chartLeft[], gdouble delta)
 {
-    if (axis)
-    {
-        gdouble delta = (p - l) / 9.0;
-
-        for (gint i = 1; i <= 9; i++)
-        {
-            gchar str[20];
-            gdouble lgchar = l;
-            if (lgchar < 0) lgchar *= -1; 
-            double_to_gchar(lgchar, 2, str);
-            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), str);
-
-            l+=delta;
-        }
-
-        return;
-    }
-
-    gdouble delta = p / 4;
     for (gint i = 1; i <= 9; i++)
     {
         if (i < 5)
