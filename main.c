@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
 #include "eval.h"
 
 #include <gtk/gtk.h>
@@ -12,9 +13,10 @@
 struct eqData
 {
     GtkWidget* equation;
-    GtkWidget* intervalL;
-    GtkWidget* intervalP;
+    GtkWidget* interval;
     GtkWidget* res;
+    GtkWidget* chartLegendLeft[9];
+    GtkWidget* chartLegendBottom[9];
 };
 
 GdkPixbuf* chartData;
@@ -25,6 +27,9 @@ static void destroy (GtkWidget *widget, gpointer data);
 static void about_run (GtkWidget *widget, gpointer data);
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
 static void calculate (GtkWidget *widget, gpointer data_);
+
+void double_to_gchar(gdouble a, int afterpoint, gchar str[]);
+void makeLegend(GtkWidget* chart[], gdouble l, gdouble p, bool axis);
 
 int main(int argc, char* argv[])
 {
@@ -71,30 +76,53 @@ int main(int argc, char* argv[])
 
     gtk_box_pack_start(GTK_BOX(vbox), menubar, FALSE, FALSE, 0);
 
-    GtkWidget* box1 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_set_border_width(GTK_CONTAINER(box1), 10);
+    GtkWidget* box1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget* boxt = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-    chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
-    put_lines_to_chart(chartData, 0, 0);
-    chart = gtk_image_new_from_pixbuf(chartData);
+    gtk_container_set_border_width(GTK_CONTAINER(box1), 10);
 
     struct eqData inputs;
 
-    inputs.equation = gtk_entry_new(); inputs.intervalL = gtk_entry_new(); inputs.intervalP = gtk_entry_new(); inputs.res = gtk_entry_new();
+    GtkWidget* chartLegendLeft = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget* chartLegendBottom = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+    for (gint i = 0; i < 9; i++)
+    {
+        inputs.chartLegendLeft[i] = gtk_label_new("");
+        inputs.chartLegendBottom[i] = gtk_label_new("");
+
+        gtk_box_pack_start(GTK_BOX(chartLegendLeft), inputs.chartLegendLeft[i], TRUE, TRUE, 0);
+        gtk_box_pack_start(GTK_BOX(chartLegendBottom), inputs.chartLegendBottom[i], TRUE, TRUE, 0);
+    }
+
+    makeLegend(inputs.chartLegendLeft, -300, 300, 0);
+    makeLegend(inputs.chartLegendBottom, -10, 10, 1);
+
+
+    GtkWidget* box2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_container_set_border_width(GTK_CONTAINER(box2), 10);
+
+    chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
+    put_lines_to_chart(chartData, -10.0, 10.0);
+    chart = gtk_image_new_from_pixbuf(chartData);
+
+    inputs.equation = gtk_entry_new(); inputs.interval = gtk_entry_new(); inputs.res = gtk_entry_new();
     gtk_entry_set_max_length(GTK_ENTRY(inputs.equation), (gint)LENGTH);
-    gtk_entry_set_max_length(GTK_ENTRY(inputs.intervalL), (gint)50);
-    gtk_entry_set_max_length(GTK_ENTRY(inputs.intervalP), (gint)50);
+    gtk_entry_set_max_length(GTK_ENTRY(inputs.interval), (gint)50);
     gtk_entry_set_max_length(GTK_ENTRY(inputs.res), (gint)50);
 
     g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(calculate), (gpointer)&inputs);
 
-    gtk_box_pack_start(GTK_BOX(box1), chart, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(box1), inputs.equation, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(box1), inputs.intervalL, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(box1), inputs.intervalP, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(box1), inputs.res, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(box1), button, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box1), chartLegendLeft, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(boxt), chart, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(boxt), chartLegendBottom, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box1), boxt, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box2), inputs.equation, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box2), inputs.interval, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box2), inputs.res, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box2), button, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(vbox), box1, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(vbox), box2, TRUE, TRUE, 0);
 
     gtk_widget_show_all(window);
     gtk_main();
@@ -110,12 +138,26 @@ static void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
         put_pixel(pixbuf, i, 300, 0, 0, 0, 255);
     }
 
-    //temp
-    for (gint i = 0; i < 600; i++)
-    {
-        put_pixel(pixbuf, 399, i, 0, 0, 0, 255);
-        put_pixel(pixbuf, 400, i, 0, 0, 0, 255);
+    gdouble s = l, t = 0.0, delta = (p - l) / 800.0;
+
+    for (gint i = 0; i < 800; i++)
+    {   
+        s += delta;
+
+        if (t * s <= 0 && i)
+        {
+            for (gint j = 0; j < 600; j++)
+            {
+                put_pixel(pixbuf, i - 1, j, 0, 0, 0, 255);
+                put_pixel(pixbuf, i, j, 0, 0, 0, 255);
+            }
+
+            break;
+        }
+
+        t = s;
     }
+    
 }
 
 static void destroy (GtkWidget *widget, gpointer data) 
@@ -169,7 +211,7 @@ static void calculate (GtkWidget *widget, gpointer data_)
     
     const gchar* wejscie, *intervalL, *intervalP, *scale_;
     gchar* eptr;
-    gdouble l, p, delta, scale;
+    gdouble l, p, delta, scale, lorg;
     gint r;
 
     wejscie = gtk_entry_get_text(GTK_ENTRY(data->equation));
@@ -186,8 +228,13 @@ static void calculate (GtkWidget *widget, gpointer data_)
     r = (gint)800;
     delta = (p - l) / (gdouble)r;
 
+    lorg = l;
+
     gdouble wyniki[r];
     gdouble max = -800.0;
+
+    chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
+    put_lines_to_chart(chartData, l, p);
 
     for (gint i = 0; i < r; i++)
     {
@@ -199,14 +246,14 @@ static void calculate (GtkWidget *widget, gpointer data_)
         l+=delta;
     }
 
-    chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
-    put_lines_to_chart(chartData, l, p);
-
     max += max * 0.4;
     if (max > 300) max = 300;
 
     if (strcmp(scale_, "") == 0) scale = 300 / max;
     else scale = strtod(scale_, &eptr);
+
+    makeLegend(data->chartLegendLeft, 0, (300/scale) / 4, 0);
+    makeLegend(data->chartLegendBottom, lorg, p, 1);
 
     for (gint i = 0; i < r; i++) 
     {
@@ -230,4 +277,96 @@ static void calculate (GtkWidget *widget, gpointer data_)
     }
     
     gtk_image_set_from_pixbuf(GTK_IMAGE(chart), chartData);
+}
+
+void reverse(char* str, int len) 
+{ 
+    int i = 0, j = len - 1, temp; 
+    while (i < j) { 
+        temp = str[i]; 
+        str[i] = str[j]; 
+        str[j] = temp; 
+        i++; 
+        j--; 
+    } 
+} 
+
+int int_to_string(int a, gchar str[], int d)
+{
+    if (a == 0) 
+    {
+        str[0] = '0';
+        str[1] = '\0';
+        return 1;
+    }
+    int i = 0; 
+    while (a) { 
+        str[i++] = (a % 10) + '0'; 
+        a = a / 10; 
+    }
+
+    while (i < d) 
+        str[i++] = '0';  
+  
+    reverse(str, i); 
+    str[i] = '\0'; 
+
+    return i;
+}
+
+void double_to_gchar(gdouble a, int afterpoint, gchar str[])
+{ 
+    int ipart = (int)a; 
+    double dpart = a - (double)ipart; 
+  
+    int i = int_to_string(ipart, str, 0); 
+  
+    if (afterpoint != 0) { 
+
+        str[i] = ','; 
+
+        dpart = dpart * pow(10, afterpoint); 
+  
+        int_to_string((int)dpart, str + i + 1, afterpoint); 
+    } 
+}
+
+void makeLegend(GtkWidget* chartLeft[], gdouble l, gdouble p, bool axis)
+{
+    if (axis)
+    {
+        gdouble delta = (p - l) / 9.0;
+
+        for (gint i = 1; i <= 9; i++)
+        {
+            gchar str[20];
+            gdouble lgchar = l;
+            if (lgchar < 0) lgchar *= -1; 
+            double_to_gchar(lgchar, 2, str);
+            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), str);
+
+            l+=delta;
+        }
+
+        return;
+    }
+
+    gdouble delta = p / 4;
+    for (gint i = 1; i <= 9; i++)
+    {
+        if (i < 5)
+        {
+            gchar str[20]; double_to_gchar((gdouble)((5 - i) * delta), 2, str);
+            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), str);
+        }
+        else if (i == 5)
+        {
+            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), "0");
+        }
+        else
+        {   
+            gchar str[20]; double_to_gchar((gdouble)((i - 5) * delta), 2, str);
+            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), str);
+        }
+    }
 }
