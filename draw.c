@@ -30,7 +30,9 @@ void draw_chart (GtkWidget *widget, eqData* data)
 
     for (gint i = 0; i < r; i++)
     {
-        double wynik = calc(wejscie, strlen(wejscie), l);
+        bool stop = false;
+        double wynik = calc(wejscie, strlen(wejscie), l, &stop);
+        if (stop) return;
 
         wyniki[i] = wynik;
 
@@ -44,8 +46,8 @@ void draw_chart (GtkWidget *widget, eqData* data)
     if (strcmp(scale_, "") == 0) scale = 300 / max;
     else scale = strtod(scale_, &eptr);
 
-    makeLegend(data->chartLegendLeft, (300/scale) / 5);
-    makeLegend(data->chartLegendBottom, p / 5);
+    ui_make_legend(data->chartLegendLeft, (300/scale) / 5);
+    ui_make_legend(data->chartLegendBottom, p / 5);
 
     /*for(gint i = 0; i < 10; i++)
     {
@@ -139,26 +141,5 @@ void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
     {
         put_pixel(pixbuf, 399, i, 0, 0, 0, 255);
         put_pixel(pixbuf, 400, i, 0, 0, 0, 255);
-    }
-}
-
-void makeLegend(GtkWidget* chartLeft[], gdouble delta)
-{
-    for (gint i = 1; i <= 11; i++)
-    {
-        if (i < 6)
-        {
-            gchar str[20]; double_to_char((gdouble)((6 - i) * delta), 2, str);
-            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), str);
-        }
-        else if (i == 6)
-        {
-            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), "0");
-        }
-        else
-        {   
-            gchar str[20]; double_to_char((gdouble)((i - 6) * delta), 2, str);
-            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), str);
-        }
     }
 }

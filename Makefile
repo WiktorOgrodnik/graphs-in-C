@@ -3,7 +3,7 @@ SRC_DIR = .
 INC_DIR = .
 OBJ_DIR = .
 CFLAGS = -std=c11 -Wall -Wextra -Werror -Wno-unused-parameter
-GTK = `pkg-config --cflags --libs gtk+-3.0`
+GTK = `pkg-config --cflags --libs gtk+-3.0` -lm
 LIBS = `pkg-config --libs gtk+-3.0` -lm
 NAME = wykresy
 

@@ -1,7 +1,22 @@
 #include "eval.h"
 #define NUMBER 0
 
-double calc(const char* eqBegin, int eqLength, double calcPoint)
+static void return_char(int c, char **inp);
+static int read_char(char **inp);
+
+static double read_value(char **inp, double xValue, bool* stop);
+
+static double expression(char **inp, double xValue, bool* stop);
+static double ingredient(char **inp, double xValue, bool* stop);
+static double factor(char **inp, double xValue, bool* stop);
+static double exponent(char **inp, double xValue, bool* stop);
+
+static double fractionalPart(double a)
+{
+    return a - floor(a);
+}
+
+double calc(const char* eqBegin, int eqLength, double calcPoint, bool* stop)
 {
     char begin[eqLength];
 
@@ -18,18 +33,18 @@ double calc(const char* eqBegin, int eqLength, double calcPoint)
     {
         return_char(c , &inptr);
 
-        result = expression(&inptr, calcPoint);
+        result = expression(&inptr, calcPoint, stop);
     }
 
     return result;
 }
 
-void return_char(int c, char **inp)
+static void return_char(int c, char **inp)
 {
     if (c != EOF && c != NUMBER) --*inp;
 }
 
-int read_char(char **inp)
+static int read_char(char **inp)
 {
     int c;
     
@@ -45,8 +60,9 @@ int read_char(char **inp)
     return c == 0 ? EOF : c;
 }
 
-double read_value(char **inp, double xValue)
+static double read_value(char **inp, double xValue, bool* stop)
 {
+    char error[100];
     int c;
     double n = 0.0, exp10 = 1.0;
 
@@ -65,6 +81,29 @@ double read_value(char **inp, double xValue)
         n = xValue; 
         c = *(*inp)++;
     }
+    else if(c == 'e')
+    {
+        n = M_E; 
+        c = *(*inp)++; 
+    }
+    else if(c == 'p')
+    {
+        c = *(*inp)++;
+        if (c == 'i') 
+        {
+            n = M_PI;
+            c = *(*inp)++;
+        } 
+        else if (c == 'h')
+        {
+            c = *(*inp)++;
+            if (c == 'i')
+            {
+                n = 1.618033988749895;
+                c = *(*inp)++;
+            }
+        }
+    }
     else if (isalpha(c))
     {
         int it = 1;
@@ -78,18 +117,42 @@ double read_value(char **inp, double xValue)
         }
         function[it] = '\0';
 
-        if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue));
-        else if (strcmp(function, "cos") == 0) n = cos(expression(inp, xValue));
-        else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) n = tan(expression(inp, xValue));
-        else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) n = 1 / tan(expression(inp, xValue));
-        else if (strcmp(function, "log") == 0 || strcmp(function, "ln") == 0) n = log(expression(inp, xValue));
-        else if (strcmp(function, "sqrt") == 0) n = sqrt(expression(inp, xValue));
-        else return nan("ERROR!");
+        if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue, stop));
+        else if (strcmp(function, "cos") == 0) n = cos(expression(inp, xValue, stop));
+        else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) n = tan(expression(inp, xValue, stop));
+        else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) n = 1 / tan(expression(inp, xValue, stop));
+        else if (strcmp(function, "log") == 0 || strcmp(function, "ln") == 0) n = log(expression(inp, xValue, stop));
+        else if (strcmp(function, "sqrt") == 0) n = sqrt(expression(inp, xValue, stop));
+        else if (strcmp(function, "log10") == 0) n = log10(expression(inp, xValue, stop));
+        else if (strcmp(function, "log2") == 0) n = log2(expression(inp, xValue, stop));
+        else if (strcmp(function, "abs") == 0) n = fabs(expression(inp, xValue, stop));
+        else if (strcmp(function, "sinh") == 0) n = sinh(expression(inp, xValue, stop));
+        else if (strcmp(function, "cosh") == 0) n = cosh(expression(inp, xValue, stop));
+        else if (strcmp(function, "tanh") == 0 || strcmp(function, "tgh") == 0) n = tanh(expression(inp, xValue, stop));
+        else if (strcmp(function, "ceil") == 0) n = ceil(expression(inp, xValue, stop));
+        else if (strcmp(function, "floor") == 0) n = floor(expression(inp, xValue, stop));
+        else if (strcmp(function, "acos") == 0 || strcmp(function, "arccos") == 0) n = acos(expression(inp, xValue, stop));
+        else if (strcmp(function, "asin") == 0 || strcmp(function, "arcsin") == 0) n = asin(expression(inp, xValue, stop));
+        else if (strcmp(function, "atan") == 0 || strcmp(function, "arctan") == 0 || strcmp(function, "arctg") == 0) n = atan(expression(inp, xValue, stop));
+        else if (strcmp(function, "exp") == 0) n = exp(expression(inp, xValue, stop));
+        else 
+        {
+            sprintf(error, "Error: Can not find: %s\n", function);
+	        error_dialog(error);
+
+            *stop = true;
+
+            return nan("OUT");
+        }
 
         if ((c = read_char(inp)) != ')') 
         {
-            return nan("ERROR!");
-            //Normalny blad
+            sprintf(error, "Error: Incorrect parenthesis, expected ')'\n");
+	        error_dialog(error);
+
+            *stop = true;
+
+            return nan("STOP");
         }
         c = NUMBER;
     }
@@ -98,41 +161,41 @@ double read_value(char **inp, double xValue)
     return n / exp10;
 }
 
-double expression(char **inp, double xValue)
+static double expression(char **inp, double xValue, bool* stop)
 {
     int c;
     double res, x2;
 
     if ((c = read_char(inp)) != '-' && c != '+') return_char(c, inp);
 
-    res = ingredient(inp, xValue);
+    res = ingredient(inp, xValue, stop);
 
     if (c == '-') res = -res;
 
     while ((c = read_char(inp)) == '+' || c == '-') 
     {
-        x2 = ingredient(inp, xValue);
+        x2 = ingredient(inp, xValue, stop);
         res = (c == '+' ? res + x2 : res - x2);
     }
     return_char(c, inp);        
     return res;
 }
 
-double ingredient(char **inp, double xValue)
+static double ingredient(char **inp, double xValue, bool* stop)
 {
     int c;
     double res, x2;
 
-    res = factor(inp, xValue);
+    res = factor(inp, xValue, stop);
     while ((c = read_char(inp)) == '*' || c == '/') 
     {
-        x2 = factor(inp, xValue);
+        x2 = factor(inp, xValue, stop);
 
         if (c == '*') res *= x2;
         else
         {
             if (x2) res /= x2;
-            else return nan("ERROR!");
+            else return nan("OUT");
         }
     }
 
@@ -140,18 +203,18 @@ double ingredient(char **inp, double xValue)
     return res;
 }
 
-double factor(char **inp, double xValue)
+static double factor(char **inp, double xValue, bool* stop)
 {
     int c;
     double res, x2;
 
-    res = exponent(inp, xValue);
+    res = exponent(inp, xValue, stop);
     while ((c = read_char(inp)) == '^') 
     {
-        x2 = exponent(inp, xValue);
+        x2 = exponent(inp, xValue, stop);
 
         if (res || x2) res = pow(res, x2);
-        else return nan("ERROR!");
+        else return nan("OUT");
         //Uwaga na kolejność wykonywania działań!
         //Do poprawy
     }
@@ -160,29 +223,65 @@ double factor(char **inp, double xValue)
     return res;
 }
 
-double exponent(char **inp, double xValue)
+static double exponent(char **inp, double xValue, bool* stop)
 {
     int c;
     double res;
-    //char error[100];
+    char error[100];
 
-    if ((c = read_char(inp)) == NUMBER) return read_value(inp, xValue);
+    if ((c = read_char(inp)) == NUMBER) return read_value(inp, xValue, stop);
     else if (c == '(') 
     {
-        res = expression(inp, xValue);
+        res = expression(inp, xValue, stop);
 
         if ((c = read_char(inp)) == ')') return res;
         else 
         {
-	        //sprintf(blad,"BLAD: oczekiwano ')', a wystapil znak: '%c'\n",z);
-	        //pokazBlad(blad);
-            return nan("ERROR!");
+	        sprintf(error, "Error: expected ')'\n");
+	        error_dialog(error);
+
+            *stop = true;
+
+            return nan("STOP");
+        }
+    }
+    else if (c == '|')
+    {
+        res = fabs(expression(inp, xValue, stop));
+
+        if ((c = read_char(inp)) == '|') return res;
+        else 
+        {
+	        sprintf(error, "Error: expected ')'\n");
+	        error_dialog(error);
+
+            *stop = true;
+
+            return nan("STOP");
+        }
+    }
+    else if (c == '{')
+    {
+        res = fractionalPart(expression(inp, xValue, stop));
+
+        if ((c = read_char(inp)) == '}') return res;
+        else 
+        {
+	        sprintf(error, "Error: expected '}'\n");
+	        error_dialog(error);
+
+            *stop = true;
+
+            return nan("STOP");
         }
     }
     else 
     {
-        //sprintf(blad,"BLAD: oczekiwano liczby lub '(', a wystapil znak: '%c'\n",z);
-	    //pokazBlad(blad);
-        return nan("ERROR!");
+        sprintf(error, "Error: expected number or '(', or '|', or '{'\n");
+	    error_dialog(error);
+
+        *stop = true;
+
+        return nan("STOP");
     }
 }

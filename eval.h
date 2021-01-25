@@ -1,3 +1,8 @@
+#ifndef EVAL_H
+#define EVAL_H
+
+#define _USE_MATH_DEFINES
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -5,14 +10,8 @@
 #include <math.h>
 #include <string.h>
 
-double calc(const char* eqBegin, int eqLength, double calcPoint);
+extern void error_dialog(const char* message);
 
-void return_char(int c, char **inp);
-int read_char(char **inp);
+double calc(const char* eqBegin, int eqLength, double calcPoint, bool* stop);
 
-double read_value(char **inp, double xValue);
-
-double expression(char **inp, double xValue);
-double ingredient(char **inp, double xValue);
-double factor(char **inp, double xValue);
-double exponent(char **inp, double xValue);
+#endif

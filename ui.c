@@ -52,8 +52,8 @@ void ui_init_inputs(eqData* data)
         gtk_widget_set_margin_bottom(data->chartLegendLeft[i], 45);
     }
 
-    makeLegend(data->chartLegendLeft, (gdouble)300 / (gdouble)5);
-    makeLegend(data->chartLegendBottom, (gdouble)10 / (gdouble)5);
+    ui_make_legend(data->chartLegendLeft, (gdouble)300 / (gdouble)5);
+    ui_make_legend(data->chartLegendBottom, (gdouble)10 / (gdouble)5);
 
     data->equation = gtk_entry_new(); data->interval = gtk_entry_new(); data->res = gtk_entry_new();
     gtk_entry_set_max_length(GTK_ENTRY(data->equation), (gint)1000);
@@ -65,6 +65,27 @@ void ui_init_inputs(eqData* data)
 
     gtk_widget_set_margin_end(data->res, (gint)300);
 
+}
+
+void ui_make_legend(GtkWidget* chartLeft[], gdouble delta)
+{
+    for (gint i = 1; i <= 11; i++)
+    {
+        if (i < 6)
+        {
+            gchar str[20]; double_to_char((gdouble)((6 - i) * delta), 2, str);
+            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), str);
+        }
+        else if (i == 6)
+        {
+            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), "0");
+        }
+        else
+        {   
+            gchar str[20]; double_to_char((gdouble)((i - 6) * delta), 2, str);
+            gtk_label_set_text(GTK_LABEL(chartLeft[i - 1]), str);
+        }
+    }
 }
 
 static void destroy (GtkWidget* widget, gpointer data) 

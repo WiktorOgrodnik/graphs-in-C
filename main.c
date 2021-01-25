@@ -4,16 +4,21 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "ui.h"
+#include "draw.h"
 
 static void destroy (GtkWidget* widget, gpointer data);
 static void calculate (GtkWidget* widget, gpointer data);
+
+void error_dialog(const char* message);
+
+static GtkWidget* window;
+static eqData inputs;
 
 int main(int argc, char* argv[])
 {
     gtk_init(&argc, &argv);
 
-    GtkWidget *window, *vbox, *menubar, *button;
+    GtkWidget *vbox, *menubar, *button;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
@@ -36,8 +41,6 @@ int main(int argc, char* argv[])
     GtkWidget* boxt = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
     gtk_container_set_border_width(GTK_CONTAINER(box1), 10);
-
-    eqData inputs;
 
     ui_init_inputs(&inputs);
 
@@ -85,6 +88,16 @@ int main(int argc, char* argv[])
     gtk_main();
 
     return 0;
+}
+
+void error_dialog(const char* message)
+{
+    GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window),
+        GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", message);
+    
+    gtk_dialog_run(GTK_DIALOG(dialog));
+
+    gtk_widget_destroy(dialog);
 }
 
 static void destroy (GtkWidget* widget, gpointer data) 
