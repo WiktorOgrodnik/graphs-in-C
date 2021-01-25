@@ -7,7 +7,7 @@ GTK = `pkg-config --cflags --libs gtk+-3.0`
 LIBS = `pkg-config --libs gtk+-3.0` -lm
 NAME = wykresy
 
-OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/eval.o  
+OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/eval.o $(OBJ_DIR)/draw.o $(OBJ_DIR)/convert.o $(OBJ_DIR)/ui.o
 
 all: $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBS)
