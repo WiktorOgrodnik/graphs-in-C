@@ -1,25 +1,29 @@
 #include "eval.h"
 #define NUMBER 0
 
+/* Definitions */
+
+//Working on chars
 static void return_char(int c, char **inp);
 static int read_char(char **inp);
 
+//Return number or func(x) or constant
 static double read_value(char **inp, double xValue, bool* stop);
 
+//Grammar terminals
 static double expression(char **inp, double xValue, bool* stop);
 static double ingredient(char **inp, double xValue, bool* stop);
 static double factor(char **inp, double xValue, bool* stop);
 static double exponent(char **inp, double xValue, bool* stop);
 
-static double fractionalPart(double a)
-{
-    return a - floor(a);
-}
+//Custom math functions
+static double fractionalPart(double a);
 
 double calc(const char* eqBegin, int eqLength, double calcPoint, bool* stop)
 {
     char begin[eqLength];
 
+    //Copy string to other array
     for (int i = 0; i <= eqLength; i++)
     {
         begin[i] = *(eqBegin + i);
@@ -29,9 +33,10 @@ double calc(const char* eqBegin, int eqLength, double calcPoint, bool* stop)
     double result;
     char* inptr = begin;
     
+    //If equation is not empty, calculate it
     if ((c = read_char(&inptr)) != EOF) 
     {
-        return_char(c , &inptr);
+        return_char(c, &inptr);
 
         result = expression(&inptr, calcPoint, stop);
     }
@@ -48,16 +53,19 @@ static int read_char(char **inp)
 {
     int c;
     
+    //EOF when '\0'
     if (**inp == '\0') return EOF;
 
+    //Skip all spaces
     while ((c = *(*inp)++) != '\0' && isspace(c));
 
+    //When char is allowed return 0
     if (isdigit(c) || c == '.' || c == ',' || isalpha(c)) 
     {
         return_char(c, inp);
         return NUMBER;
     }
-    return c == 0 ? EOF : c;
+    return c == 0 ? EOF : c; //If 0 return EOF
 }
 
 static double read_value(char **inp, double xValue, bool* stop)
@@ -66,22 +74,24 @@ static double read_value(char **inp, double xValue, bool* stop)
     int c;
     double n = 0.0, exp10 = 1.0;
 
+    //Number - calculate part of the total
     while ((c = *(*inp)++) != '\0' && isdigit(c)) n = 10.0 * n + (c -'0');
 
     if (c == '.' || c == ',')
-    {
+    {   
+        //Number - calculate fractional part
         while ((c = *(*inp)++) != '\0' && isdigit(c)) 
         {
             n = 10.0 * n + (c - '0');
             exp10 *= 10.0;
         }
     }
-    else if(c == 'x') 
+    else if(c == 'x') //Variable
     {
         n = xValue; 
         c = *(*inp)++;
     }
-    else if(c == 'e')
+    else if(c == 'e') //e constant
     {
         n = M_E; 
         c = *(*inp)++; 
@@ -89,7 +99,7 @@ static double read_value(char **inp, double xValue, bool* stop)
     else if(c == 'p')
     {
         c = *(*inp)++;
-        if (c == 'i') 
+        if (c == 'i') //pi constant
         {
             n = M_PI;
             c = *(*inp)++;
@@ -97,27 +107,31 @@ static double read_value(char **inp, double xValue, bool* stop)
         else if (c == 'h')
         {
             c = *(*inp)++;
-            if (c == 'i')
+            if (c == 'i') ///phi constant
             {
                 n = 1.618033988749895;
                 c = *(*inp)++;
             }
         }
     }
-    else if (isalpha(c))
+    /*
+    To-do: Implement constants module
+    */
+    else if (isalpha(c)) // Function module
     {
         int it = 1;
         char function[10];
         function[0] = (char)c;
 
-        while ((c = *(*inp)++) != '\0' && c != '(') 
+        while ((c = *(*inp)++) != '\0' && c != '(') //Read function name
         {
             function[it] = (char)c;
             it++;
         }
         function[it] = '\0';
 
-        if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue, stop));
+        //Function switch - to-do: pointers to function
+        if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue, stop)); 
         else if (strcmp(function, "cos") == 0) n = cos(expression(inp, xValue, stop));
         else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) n = tan(expression(inp, xValue, stop));
         else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) n = 1 / tan(expression(inp, xValue, stop));
@@ -161,7 +175,7 @@ static double read_value(char **inp, double xValue, bool* stop)
     return n / exp10;
 }
 
-static double expression(char **inp, double xValue, bool* stop)
+static double expression(char **inp, double xValue, bool* stop) //Expression consist of ingredients and signs '+' and '-'
 {
     int c;
     double res, x2;
@@ -181,7 +195,7 @@ static double expression(char **inp, double xValue, bool* stop)
     return res;
 }
 
-static double ingredient(char **inp, double xValue, bool* stop)
+static double ingredient(char **inp, double xValue, bool* stop) //ingredient consist of factors and sings '*' and '/'
 {
     int c;
     double res, x2;
@@ -203,7 +217,7 @@ static double ingredient(char **inp, double xValue, bool* stop)
     return res;
 }
 
-static double factor(char **inp, double xValue, bool* stop)
+static double factor(char **inp, double xValue, bool* stop) //factors consist of exponents and sign '^'
 {
     int c;
     double res, x2;
@@ -221,7 +235,7 @@ static double factor(char **inp, double xValue, bool* stop)
     return res;
 }
 
-static double exponent(char **inp, double xValue, bool* stop)
+static double exponent(char **inp, double xValue, bool* stop) //exponent can be number or function or variable or constant or parentheses '()', '{}', '||'
 {
     int c;
     double res;
@@ -282,4 +296,9 @@ static double exponent(char **inp, double xValue, bool* stop)
 
         return nan("STOP");
     }
+}
+
+static double fractionalPart(double a)
+{
+    return a - floor(a);
 }

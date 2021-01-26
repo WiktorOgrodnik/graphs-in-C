@@ -49,16 +49,20 @@ void draw_chart (GtkWidget *widget, eqData* data)
     draw_make_legend(data->chartLegendLeft, (300/scale) / 5);
     draw_make_legend(data->chartLegendBottom, p / 5);
 
-    /*for(gint i = 0; i < 10; i++)
+    for(gint i = 0; i < 10; i++)
     {
-        GtkRequisition r;
+        //Problem w tym miejscu ->
+        
+        //GtkRequisition r;
 
-        gtk_widget_get_preferred_size(data->chartLegendBottom[i], &r, NULL);
+        /*gint w;
+        gtk_widget_get_preferred_width(data->chartLegendBottom[i], NULL, &w);
 
-        gint width = 80 - r.width;
-        gtk_widget_set_margin_end(GTK_WIDGET(data->chartLegendBottom[i]), width);
-    }*/
+        gint width = 80 - w;
+        gtk_widget_set_margin_end(GTK_WIDGET(data->chartLegendBottom[i]), width);*/
+    }
 
+    //draw and rasterization
     for (gint i = 0; i < r; i++) 
     {
         wyniki[i] = (gint)(300 - (wyniki[i]) * scale);
