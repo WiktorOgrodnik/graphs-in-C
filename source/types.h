@@ -1,7 +1,12 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <stdio.h>
+#include <stdbool.h>
+#include <ctype.h>
+#include <string.h>
 #include <stdlib.h>
+
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 

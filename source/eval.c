@@ -211,12 +211,10 @@ static double factor(char **inp, double xValue, bool* stop)
     res = exponent(inp, xValue, stop);
     while ((c = read_char(inp)) == '^') 
     {
-        x2 = exponent(inp, xValue, stop);
+        x2 = factor(inp, xValue, stop);
 
         if (res || x2) res = pow(res, x2);
         else return nan("OUT");
-        //Uwaga na kolejność wykonywania działań!
-        //Do poprawy
     }
 
     return_char(c, inp);        
