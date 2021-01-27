@@ -1,14 +1,15 @@
 #ifndef EVAL_H
 #define EVAL_H
 
-#define _USE_MATH_DEFINES
+#include "types.h"
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
+#ifdef WINDOWS
+#define _USE_MATH_DEFINES
+#else
+#define _GNU_SOURCE 
+#endif
+
+
 
 //Print error on screen (function from ui.h)
 extern void error_dialog(const char* message);

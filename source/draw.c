@@ -52,7 +52,6 @@ void draw_chart (GtkWidget *widget, eqData* data)
     for(gint i = 0; i < 10; i++)
     {
         //Problem w tym miejscu ->
-        
         //GtkRequisition r;
 
         /*gint w;
