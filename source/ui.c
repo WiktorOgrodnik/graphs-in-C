@@ -4,6 +4,9 @@ static void destroy (GtkWidget* widget, gpointer data);
 static void about_run (GtkWidget* widget, gpointer data);
 static void calculate (GtkWidget* widget, gpointer data);
 
+static void checkbox_rasterization_toggle(GtkWidget* widget, gpointer data);
+static void checkbox_experimental_toggle(GtkWidget* widget, gpointer data);
+
 static GtkWidget* ui_init_menu();
 static void ui_init_inputs(eqData* data);
 static void ui_init_window();
@@ -15,62 +18,96 @@ void ui_init(int argc, char* argv[])
 {
     gtk_init(&argc, &argv);
 
+    //Init application Window
     ui_init_window();
-
-    GtkWidget* mainBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_add(GTK_CONTAINER(window), mainBox);
-
+    //Init textboxes, chart and charts legend
+    ui_init_inputs(&inputs); 
+    //Init menubar (File, Edit, etc.)
     GtkWidget* menubar = ui_init_menu(); 
 
-    GtkWidget* boxLegendAndChart = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_container_set_border_width(GTK_CONTAINER(boxLegendAndChart), 10);
+    /* All program Box */
+        
+        GtkWidget* mainBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_container_add(GTK_CONTAINER(window), mainBox);
 
-    ui_init_inputs(&inputs);
+        gtk_box_pack_start(GTK_BOX(mainBox), menubar, FALSE, FALSE, 0);
 
-    gtk_box_pack_start(GTK_BOX(boxLegendAndChart), inputs.chartLegendLeftBox, TRUE, TRUE, 0);
+        /* Box with Legend and the chart */
+            GtkWidget* boxLegendAndChart = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+            gtk_container_set_border_width(GTK_CONTAINER(boxLegendAndChart), 10);
 
-    GtkWidget* boxChartAndLegendBottom = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+            gtk_box_pack_start(GTK_BOX(boxLegendAndChart), inputs.chartLegendLeftBox, TRUE, TRUE, 0);
 
-    gtk_box_pack_start(GTK_BOX(boxChartAndLegendBottom), inputs.chart, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(boxChartAndLegendBottom), inputs.chartLegendBottomBox, TRUE, TRUE, 0);
+            /* Box with chat and horizontal legend*/
+                GtkWidget* boxChartAndLegendBottom = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-    gtk_box_pack_start(GTK_BOX(boxLegendAndChart), boxChartAndLegendBottom, TRUE, TRUE, 0);
+                gtk_box_pack_start(GTK_BOX(boxChartAndLegendBottom), inputs.chart, TRUE, TRUE, 0);
+                gtk_box_pack_start(GTK_BOX(boxChartAndLegendBottom), inputs.chartLegendBottomBox, TRUE, TRUE, 0);
 
-    GtkWidget* boxInputs = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_set_border_width(GTK_CONTAINER(boxInputs), 10);
+            gtk_box_pack_start(GTK_BOX(boxLegendAndChart), boxChartAndLegendBottom, TRUE, TRUE, 0);
 
-    GtkWidget* boxEntryProps = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_margin_bottom(boxEntryProps, 20);
+        gtk_box_pack_start(GTK_BOX(mainBox), boxLegendAndChart, TRUE, TRUE, 0);
 
-    GtkWidget* label1 = gtk_label_new("Przedział: ");
-    GtkWidget* label2 = gtk_label_new("Skala: ");
-    gtk_widget_set_margin_start(label2, 10);
+        /* Box with textboxes and button */
+            GtkWidget* boxInputs = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+            gtk_container_set_border_width(GTK_CONTAINER(boxInputs), 10);
+            /* Box with properties textboxes and settings checkboxes */
 
-    gtk_box_pack_start(GTK_BOX(boxEntryProps), label1, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(boxEntryProps), inputs.interval, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(boxEntryProps), label2, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(boxEntryProps), inputs.res, TRUE, TRUE, 0);
+                GtkWidget* boxCheckAndProps = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0); //Change to Horizontal
+                gtk_widget_set_margin_bottom(boxCheckAndProps, 20);
 
-    gtk_box_pack_start(GTK_BOX(boxInputs), boxEntryProps, TRUE, TRUE, 0);
+                /* Box woth scale textbox and interval textbox */
+                    GtkWidget* boxEntryProps = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-    GtkWidget* boxEntryFunc = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_widget_set_margin_bottom(boxEntryFunc, 20);
+                    GtkWidget* label1 = gtk_label_new("Przedział: ");
+                    GtkWidget* label2 = gtk_label_new("Skala: ");
+                    gtk_widget_set_margin_start(label2, 10);
 
-    GtkWidget* label3 = gtk_label_new("f(x) = ");
+                    gtk_box_pack_start(GTK_BOX(boxEntryProps), label1, FALSE, FALSE, 0);
+                    gtk_box_pack_start(GTK_BOX(boxEntryProps), inputs.interval, FALSE, FALSE, 0);
+                    gtk_box_pack_start(GTK_BOX(boxEntryProps), label2, FALSE, FALSE, 0);
+                    gtk_box_pack_start(GTK_BOX(boxEntryProps), inputs.res, FALSE, FALSE, 0);
 
-    gtk_box_pack_start(GTK_BOX(boxEntryFunc), label3, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(boxEntryFunc), inputs.equation, TRUE, TRUE, 0);
+                gtk_box_pack_start(GTK_BOX(boxCheckAndProps), boxEntryProps, FALSE, FALSE, 0);
 
-    gtk_box_pack_start(GTK_BOX(boxInputs), boxEntryFunc, TRUE, TRUE, 0);
+                /* Box with checkboxes */
+                    GtkWidget* checkBoxBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+                    gtk_widget_set_margin_top(checkBoxBox, 20);
 
-    GtkWidget* button = gtk_button_new_with_label("Wprowadź");
-    g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(calculate), (gpointer)&inputs);
-    
-    gtk_box_pack_start(GTK_BOX(boxInputs), button, TRUE, TRUE, 0);
+                    GtkWidget* label3 = gtk_label_new("Rasteryzacja: ");
+                    GtkWidget* label4 = gtk_label_new("Mikropróbkowanie: ");
 
-    gtk_box_pack_start(GTK_BOX(mainBox), menubar, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(mainBox), boxLegendAndChart, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(mainBox), boxInputs, TRUE, TRUE, 0);
+                    gtk_widget_set_margin_end(label3, 5);
+                    gtk_widget_set_margin_end(label4, 5);
+                    gtk_widget_set_margin_start(label4, 10);
+
+                    gtk_box_pack_start(GTK_BOX(checkBoxBox), label3, FALSE, FALSE, 0);
+                    gtk_box_pack_start(GTK_BOX(checkBoxBox), inputs.rasterizationCheckBox, FALSE, FALSE, 0);
+                    gtk_box_pack_start(GTK_BOX(checkBoxBox), label4, FALSE, FALSE, 0);
+                    gtk_box_pack_start(GTK_BOX(checkBoxBox), inputs.experimentalMicroSamplingCheckBox, FALSE, FALSE, 0);
+                
+                gtk_box_pack_start(GTK_BOX(boxCheckAndProps), checkBoxBox, FALSE, FALSE, 0);
+
+            gtk_box_pack_start(GTK_BOX(boxInputs), boxCheckAndProps, TRUE, TRUE, 0);
+
+            /* Box with function textbox */
+                GtkWidget* boxEntryFunc = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+                gtk_widget_set_margin_bottom(boxEntryFunc, 20);
+
+                GtkWidget* label5 = gtk_label_new("f(x) = ");
+
+                gtk_box_pack_start(GTK_BOX(boxEntryFunc), label5, FALSE, FALSE, 0);
+                gtk_box_pack_start(GTK_BOX(boxEntryFunc), inputs.equation, TRUE, TRUE, 0);
+
+            gtk_box_pack_start(GTK_BOX(boxInputs), boxEntryFunc, TRUE, TRUE, 0);
+
+            //Insert button
+            GtkWidget* button = gtk_button_new_with_label("Wprowadź");
+            g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(calculate), (gpointer)&inputs);
+        
+            gtk_box_pack_start(GTK_BOX(boxInputs), button, TRUE, TRUE, 0);
+
+        gtk_box_pack_start(GTK_BOX(mainBox), boxInputs, TRUE, TRUE, 0);
 
     gtk_widget_show_all(window);
     gtk_main();
@@ -116,6 +153,9 @@ static GtkWidget* ui_init_menu()
 
 static void ui_init_inputs(eqData* data)
 {
+    data->rasterization = true;
+    data->microSampling = false;
+
     data->chartLegendLeftBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     data->chartLegendBottomBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
@@ -139,8 +179,13 @@ static void ui_init_inputs(eqData* data)
 
     data->equation = gtk_entry_new(); data->interval = gtk_entry_new(); data->res = gtk_entry_new();
     gtk_entry_set_max_length(GTK_ENTRY(data->equation), (gint)1000);
+    
     gtk_entry_set_max_length(GTK_ENTRY(data->interval), (gint)20);
+    gtk_entry_set_width_chars(GTK_ENTRY(data->interval), (gint)20);
     gtk_entry_set_max_length(GTK_ENTRY(data->res), (gint)20);
+    gtk_entry_set_width_chars(GTK_ENTRY(data->res), (gint)20);
+
+    gtk_widget_set_size_request(data->res, 50, -1);
 
     gtk_entry_set_text(GTK_ENTRY(data->interval), "10.0");
     gtk_entry_set_text(GTK_ENTRY(data->res), "30.0");
@@ -151,6 +196,14 @@ static void ui_init_inputs(eqData* data)
     put_lines_to_chart(data->chartData, -10.0, 10.0);
     data->chart = gtk_image_new_from_pixbuf(data->chartData);
     gtk_widget_set_margin_top(data->chart, 4);
+
+    data->rasterizationCheckBox = gtk_check_button_new();
+    data->experimentalMicroSamplingCheckBox = gtk_check_button_new();
+
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(data->rasterizationCheckBox), TRUE);
+
+    g_signal_connect(data->rasterizationCheckBox, "toggled", G_CALLBACK(checkbox_rasterization_toggle), data);
+    g_signal_connect(data->experimentalMicroSamplingCheckBox, "toggled", G_CALLBACK(checkbox_experimental_toggle), data);
 }
 
 static void ui_init_window()
@@ -184,4 +237,24 @@ static void about_run (GtkWidget* widget, gpointer data)
 static void calculate (GtkWidget *widget, gpointer data) 
 {
     draw_chart(widget, (eqData*)data);
+}
+
+static void checkbox_rasterization_toggle(GtkWidget* widget, gpointer data)
+{
+    eqData* localData = (eqData*)data;
+
+    if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+       localData->rasterization = true;
+    else
+        localData->rasterization = false;
+}
+
+static void checkbox_experimental_toggle(GtkWidget* widget, gpointer data)
+{
+    eqData* localData = (eqData*)data;
+    
+    if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
+       localData->microSampling = true;
+    else
+        localData->microSampling = false;
 }

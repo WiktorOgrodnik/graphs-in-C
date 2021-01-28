@@ -3,14 +3,6 @@
 
 #include "types.h"
 
-#ifdef WINDOWS
-#define _USE_MATH_DEFINES
-#else
-#define _GNU_SOURCE 
-#endif
-
-
-
 //Print error on screen (function from ui.h)
 extern void error_dialog(const char* message);
 

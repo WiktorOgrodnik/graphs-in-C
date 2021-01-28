@@ -3,6 +3,12 @@
 
 #define WINDOWS
 
+#ifdef WINDOWS
+#define _USE_MATH_DEFINES
+#else
+#define _GNU_SOURCE 
+#endif
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <ctype.h>
@@ -15,6 +21,7 @@
 
 typedef struct eqData_
 {
+    //Application elements
     GtkWidget* equation;
     GtkWidget* interval;
     GtkWidget* res;
@@ -27,6 +34,13 @@ typedef struct eqData_
     GtkWidget* chartLegendLeftBox;
     GtkWidget* chartLegendBottomBox;
 
+    GtkWidget* rasterizationCheckBox;
+    GtkWidget* experimentalMicroSamplingCheckBox;
+
+    //Settings
+    bool rasterization;
+    bool microSampling;
+    
 } eqData;
 
 #endif

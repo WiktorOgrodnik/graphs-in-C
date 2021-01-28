@@ -1,6 +1,7 @@
 #include "draw.h"
 
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
+static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta);
 
 void draw_chart (GtkWidget *widget, eqData* data) 
 {
@@ -18,6 +19,8 @@ void draw_chart (GtkWidget *widget, eqData* data)
 
     p = l;
     l *= -1;
+
+    gint lorg = l;
 
     r = (gint)800;
     delta = (p - l) / (gdouble)r;
@@ -68,24 +71,12 @@ void draw_chart (GtkWidget *widget, eqData* data)
 
         if (!isnan(wyniki[i]) && wyniki[i] >=0 && wyniki[i] <= 600) put_pixel(data->chartData, i, wyniki[i], 0, 0, 255, 255); 
 
-        if (i && !isnan(wyniki[i]))
-        {
-            gint start = wyniki[i - 1] < wyniki[i] ? (gint)wyniki[i - 1] : (gint)wyniki[i];
-            gint end = wyniki[i - 1] < wyniki[i] ? (gint)wyniki[i] : (gint)wyniki[i - 1];
-
-            if (end - start >= 2 && end - start < 400)
-            {
-                for (gint j = start; j < end; j++)
-                {
-                    put_pixel(data->chartData, i, j, 0, 0, 255, 255);
-                }
-            }
-        }
+        if (i && !isnan(wyniki[i]) && data->rasterization)
+            draw_rasterizaton(data, wyniki, i, lorg, delta);
     }
     
     gtk_image_set_from_pixbuf(GTK_IMAGE(data->chart), data->chartData);
 }
-
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha)
 {
     int width, height, rowstride, n_channels;
@@ -112,6 +103,40 @@ static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green
     p[1] = green;
     p[2] = blue;
     p[3] = alpha;
+}
+
+static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta)
+{
+    gint start = wyniki[column - 1] < wyniki[column] ? (gint)wyniki[column - 1] : (gint)wyniki[column];
+    gint end = wyniki[column - 1] < wyniki[column] ? (gint)wyniki[column] : (gint)wyniki[column - 1];
+
+    bool stopRast = false;
+
+    if (data->microSampling)
+    {
+        const gchar* equation = gtk_entry_get_text(GTK_ENTRY(data->equation));
+        gdouble sampling[10001];
+
+        for (gint i = 0; i <= 1000; i++)
+        {
+            bool stop = false;
+            sampling[i] = calc(equation, strlen(equation), l + (delta*column) + (gdouble)i/1000, &stop);
+        }
+
+        for (gint i = 1; i <= 1000 && !stopRast; i++)
+        {
+            if (sampling[i - 1] - sampling[i] > 0.5 || sampling[i] - sampling[i - 1] > 0.5) stopRast = true;
+            //if (column == 300) printf("%lf\n", sampling[i-1]);
+        }
+    }
+
+    if (end - start >= 2 && end - start < 400 && !stopRast)
+    {
+        for (gint i = start; i < end; i++)
+        {
+            put_pixel(data->chartData, column, i, 255, 0, 0, 255);
+        }
+    }
 }
 
 void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
