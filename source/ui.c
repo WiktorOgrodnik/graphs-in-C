@@ -75,7 +75,7 @@ void ui_init(int argc, char* argv[])
                     gtk_widget_set_margin_top(checkBoxBox, 20);
 
                     GtkWidget* label3 = gtk_label_new("Rasteryzacja: ");
-                    GtkWidget* label4 = gtk_label_new("Mikropróbkowanie: ");
+                    GtkWidget* label4 = gtk_label_new("Mikropróbkowanie (eksperymentalne): ");
 
                     gtk_widget_set_margin_end(label3, 5);
                     gtk_widget_set_margin_end(label4, 5);

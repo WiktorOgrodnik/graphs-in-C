@@ -77,6 +77,7 @@ void draw_chart (GtkWidget *widget, eqData* data)
     
     gtk_image_set_from_pixbuf(GTK_IMAGE(data->chart), data->chartData);
 }
+
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha)
 {
     int width, height, rowstride, n_channels;
@@ -111,22 +112,22 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
     gint end = wyniki[column - 1] < wyniki[column] ? (gint)wyniki[column] : (gint)wyniki[column - 1];
 
     bool stopRast = false;
+    gdouble sampling[2341];
 
-    if (data->microSampling)
+    if (end - start >= 2 && end - start < 400 && data->microSampling)
     {
         const gchar* equation = gtk_entry_get_text(GTK_ENTRY(data->equation));
-        gdouble sampling[10001];
 
-        for (gint i = 0; i <= 1000; i++)
+        for (gint i = 0; i <= 2340; i++)
         {
             bool stop = false;
-            sampling[i] = calc(equation, strlen(equation), l + (delta*column) + (gdouble)i/1000, &stop);
+            sampling[i] = calc(equation, strlen(equation), l + (delta*(gdouble)(column - 1)) + ((gdouble)(i+30)/2340 * delta), &stop);
         }
 
-        for (gint i = 1; i <= 1000 && !stopRast; i++)
+        for (gint i = 1; i <= 2340 && !stopRast; i++)
         {
-            if (sampling[i - 1] - sampling[i] > 0.5 || sampling[i] - sampling[i - 1] > 0.5) stopRast = true;
-            //if (column == 300) printf("%lf\n", sampling[i-1]);
+            if (fabs(sampling[i - 1] - sampling[i]) > 0.5) 
+                stopRast = true;
         }
     }
 
@@ -134,7 +135,7 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
     {
         for (gint i = start; i < end; i++)
         {
-            put_pixel(data->chartData, column, i, 255, 0, 0, 255);
+            put_pixel(data->chartData, column, i, 0, 0, 255, 255);
         }
     }
 }

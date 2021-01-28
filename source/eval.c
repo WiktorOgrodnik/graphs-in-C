@@ -235,7 +235,7 @@ static double factor(char **inp, double xValue, bool* stop) //factors consist of
     return res;
 }
 
-static double exponent(char **inp, double xValue, bool* stop) //exponent can be number or function or variable or constant or parentheses '()', '{}', '||'
+static double exponent(char **inp, double xValue, bool* stop) //exponent can be number or function or variable or constant or parentheses '()', '{}', '||', '[]'
 {
     int c;
     double res;
@@ -287,9 +287,24 @@ static double exponent(char **inp, double xValue, bool* stop) //exponent can be 
             return nan("STOP");
         }
     }
+    else if (c == '[')
+    {
+        res = floor(expression(inp, xValue, stop));
+
+        if ((c = read_char(inp)) == ']') return res;
+        else 
+        {
+	        sprintf(error, "Error: expected ']'\n");
+	        error_dialog(error);
+
+            *stop = true;
+
+            return nan("STOP");
+        }
+    }
     else 
     {
-        sprintf(error, "Error: expected number or '(', or '|', or '{'\n");
+        sprintf(error, "Error: expected number or '(', or '|', or '{', or '['\n");
 	    error_dialog(error);
 
         *stop = true;
