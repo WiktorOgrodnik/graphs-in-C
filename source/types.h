@@ -22,7 +22,7 @@
 typedef struct eqData_
 {
     //Application elements
-    GtkWidget* equation;
+    GtkWidget* equation[4];
     GtkWidget* interval;
     GtkWidget* res;
     GtkWidget* chartLegendLeft[11];

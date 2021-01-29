@@ -94,16 +94,39 @@ void ui_init(int argc, char* argv[])
 
             gtk_box_pack_start(GTK_BOX(boxInputs), boxCheckAndProps, TRUE, TRUE, 0);
 
-            /* Box with function textbox */
+            /* Boxes with functions textbox */
+            for (gint i = 0; i < 4; i++)
+            {
                 GtkWidget* boxEntryFunc = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-                gtk_widget_set_margin_bottom(boxEntryFunc, 20);
+                gtk_widget_set_margin_bottom(boxEntryFunc, 10);
 
-                GtkWidget* label5 = gtk_label_new("f(x) = ");
+                char labelContent[10];
+                sprintf(labelContent, "f%d(x) = ", i + 1);
+                GtkWidget* label5 = gtk_label_new(labelContent);
+
+                /*GtkWidget* colorInfoBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+                cairo_t* cr = cairo_create(NULL);
+                //cr->
+
+                GdkRectangle colorInfo;
+                colorInfo.x = colorInfo.y = 0;
+                colorInfo.width = colorInfo.height = 10;
+
+                gdk_cairo_rectangle(cr, &colorInfo);
+                cairo_clip(cr);
+
+                cairo_set_source_rgb(cr, 0, 0, 255);
+                cairo_fill(cr);
+                //colorInfo.height
+                gtk_widget_draw(colorInfoBox, cr);*/
 
                 gtk_box_pack_start(GTK_BOX(boxEntryFunc), label5, FALSE, FALSE, 0);
-                gtk_box_pack_start(GTK_BOX(boxEntryFunc), inputs.equation, TRUE, TRUE, 0);
-
-            gtk_box_pack_start(GTK_BOX(boxInputs), boxEntryFunc, TRUE, TRUE, 0);
+                gtk_box_pack_start(GTK_BOX(boxEntryFunc), inputs.equation[i], TRUE, TRUE, 0);
+                //gtk_box_pack_start(GTK_BOX(boxEntryFunc), colorInfoBox, FALSE, FALSE, 0);
+                
+                gtk_box_pack_start(GTK_BOX(boxInputs), boxEntryFunc, TRUE, TRUE, 0);
+            }
 
             //Insert button
             GtkWidget* button = gtk_button_new_with_label("Wprowadź");
@@ -184,8 +207,13 @@ static void ui_init_inputs(eqData* data)
     draw_make_legend(data->chartLegendLeft, (gdouble)300 / (gdouble)5);
     draw_make_legend(data->chartLegendBottom, (gdouble)10 / (gdouble)5);
 
-    data->equation = gtk_entry_new(); data->interval = gtk_entry_new(); data->res = gtk_entry_new();
-    gtk_entry_set_max_length(GTK_ENTRY(data->equation), (gint)1000);
+    for (gint i = 0; i < 4; i++)
+    {
+        data->equation[i] = gtk_entry_new(); 
+        gtk_entry_set_max_length(GTK_ENTRY(data->equation[i]), (gint)1000);
+    }
+    
+    data->interval = gtk_entry_new(); data->res = gtk_entry_new();
     
     gtk_entry_set_max_length(GTK_ENTRY(data->interval), (gint)20);
     gtk_entry_set_width_chars(GTK_ENTRY(data->interval), (gint)20);
@@ -219,7 +247,7 @@ static void ui_init_window()
 
     g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
 
-    gtk_window_set_default_size(GTK_WINDOW(window), 900, 1000);
+    gtk_window_set_default_size(GTK_WINDOW(window), 900, 800);
     gtk_window_set_title(GTK_WINDOW(window), "Wykresy");
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     gtk_window_set_resizable(GTK_WINDOW(window), TRUE);

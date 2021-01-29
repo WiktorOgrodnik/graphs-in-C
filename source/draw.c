@@ -1,15 +1,14 @@
 #include "draw.h"
 
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
-static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta);
+static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color);
 
 void draw_chart (GtkWidget *widget, eqData* data) 
 {
-    const gchar* wejscie, *interval, *scale_;
+    const gchar* equation, *interval, *scale_;
     gdouble l, p, delta, scale;
     gint r;
 
-    wejscie = gtk_entry_get_text(GTK_ENTRY(data->equation));
     interval = gtk_entry_get_text(GTK_ENTRY(data->interval));
     scale_ = gtk_entry_get_text(GTK_ENTRY(data->res));
 
@@ -24,23 +23,36 @@ void draw_chart (GtkWidget *widget, eqData* data)
     r = (gint)800;
     delta = (p - l) / (gdouble)r;
 
-    gdouble wyniki[r];
+    gdouble wyniki[4][r];
     gdouble max = -800.0;
+
+    for (gint i = 0; i < 4; i++)
+    {
+        for (gint j = 0; j < r; j++)
+            wyniki[i][j] = nan("default");
+    }
 
     data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
     put_lines_to_chart(data->chartData, l, p);
 
-    for (gint i = 0; i < r; i++)
+    for (gint k = 3; k >= 0; k--)
     {
-        bool stop = false;
-        double wynik = calc(wejscie, strlen(wejscie), l, &stop);
-        if (stop) return;
+        for (gint i = 0; i < r; i++)
+        {
+            equation = gtk_entry_get_text(GTK_ENTRY(data->equation[k]));
+            if (strlen(equation) == 0) break;
 
-        wyniki[i] = wynik;
+            bool stop = false;
+            double wynik = calc(equation, strlen(equation), l, &stop);
+            if (stop) continue;
 
-        if (!isnan(wynik) && wynik > max) max = wynik;
-        l+=delta;
+            wyniki[k][i] = wynik;
+
+            if (!isnan(wynik) && wynik > max) max = wynik;
+            l+=delta;
+        }
     }
+    
 
     max += max * 0.4;
     if (max > 300) max = 300;
@@ -64,14 +76,23 @@ void draw_chart (GtkWidget *widget, eqData* data)
     }
 
     //draw and rasterization
-    for (gint i = 0; i < r; i++) 
+    for (gint k = 3; k >= 0; k--)
     {
-        wyniki[i] = (gint)(300 - (wyniki[i]) * scale);
+        for (gint i = 0; i < r; i++) 
+        {
+            wyniki[k][i] = (gint)(300 - (wyniki[k][i]) * scale);
 
-        if (!isnan(wyniki[i]) && wyniki[i] >=0 && wyniki[i] <= 600) put_pixel(data->chartData, i, wyniki[i], 0, 0, 255, 255); 
+            if (!isnan(wyniki[k][i]) && wyniki[k][i] >=0 && wyniki[k][i] <= 600) 
+            {
+                if (k == 0) put_pixel(data->chartData, i, wyniki[k][i], 0, 0, 255, 255);
+                else if (k == 1) put_pixel(data->chartData, i, wyniki[k][i], 255, 0, 0, 255);
+                else if (k == 2) put_pixel(data->chartData, i, wyniki[k][i], 0, 255, 0, 255);
+                else put_pixel(data->chartData, i, wyniki[k][i], 125, 27, 186, 255);
+            }
 
-        if (i && !isnan(wyniki[i]) && data->rasterization)
-            draw_rasterizaton(data, wyniki, i, lorg, delta);
+            if (i && !isnan(wyniki[k][i]) && data->rasterization)
+                draw_rasterizaton(data, wyniki[k], i, lorg, delta, k);
+        }
     }
     
     gtk_image_set_from_pixbuf(GTK_IMAGE(data->chart), data->chartData);
@@ -105,7 +126,7 @@ static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green
     p[3] = alpha;
 }
 
-static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta)
+static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color)
 {
     gint start = wyniki[column - 1] < wyniki[column] ? (gint)wyniki[column - 1] : (gint)wyniki[column];
     gint end = wyniki[column - 1] < wyniki[column] ? (gint)wyniki[column] : (gint)wyniki[column - 1];
@@ -115,7 +136,7 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
 
     if (end - start >= 2 && end - start < 400 && data->microSampling)
     {
-        const gchar* equation = gtk_entry_get_text(GTK_ENTRY(data->equation));
+        const gchar* equation = gtk_entry_get_text(GTK_ENTRY(data->equation[color]));
 
         for (gint i = 0; i <= 2340; i++)
         {
@@ -134,7 +155,10 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
     {
         for (gint i = start; i < end; i++)
         {
-            put_pixel(data->chartData, column, i, 0, 0, 255, 255);
+            if (color == 0) put_pixel(data->chartData, column, i, 0, 0, 255, 255);
+            else if (color == 1) put_pixel(data->chartData, column, i, 255, 0, 0, 255);
+            else if (color == 1) put_pixel(data->chartData, column, i, 0, 255, 0, 255);
+            else put_pixel(data->chartData, column, i, 255, 255, 0, 255);
         }
     }
 }
