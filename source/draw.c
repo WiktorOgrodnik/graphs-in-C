@@ -6,7 +6,6 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
 void draw_chart (GtkWidget *widget, eqData* data) 
 {
     const gchar* wejscie, *interval, *scale_;
-    gchar* eptr;
     gdouble l, p, delta, scale;
     gint r;
 
@@ -15,7 +14,7 @@ void draw_chart (GtkWidget *widget, eqData* data)
     scale_ = gtk_entry_get_text(GTK_ENTRY(data->res));
 
     if (strcmp(interval, "") == 0) l = 10.0;
-    else l = strtod(interval, &eptr);
+    else l = char_to_double(interval);
 
     p = l;
     l *= -1;
@@ -47,10 +46,10 @@ void draw_chart (GtkWidget *widget, eqData* data)
     if (max > 300) max = 300;
 
     if (strcmp(scale_, "") == 0) scale = 300 / max;
-    else scale = strtod(scale_, &eptr);
+    else scale = char_to_double(scale_);
 
-    draw_make_legend(data->chartLegendLeft, (300/scale) / 5);
-    draw_make_legend(data->chartLegendBottom, p / 5);
+    draw_make_legend(data->chartLegendLeft, (300.0/scale) / 5.0);
+    draw_make_legend(data->chartLegendBottom, p / 5.0);
 
     for(gint i = 0; i < 10; i++)
     {
@@ -170,6 +169,17 @@ void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
     {
         put_pixel(pixbuf, 399, i, 0, 0, 0, 255);
         put_pixel(pixbuf, 400, i, 0, 0, 0, 255);
+    }
+
+    for(int i = 385, j = 15; j >= -15; i++, j--)
+    {
+        put_pixel(pixbuf, i, abs(j), 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, i, abs(j) - 1, 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, i, abs(j) - 2, 0u, 0u, 0u, 255u);
+
+        put_pixel(pixbuf, 800 - abs(j), i - 100, 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, 799 - abs(j), i - 100, 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, 798 - abs(j), i - 100, 0u, 0u, 0u, 255u);
     }
 }
 

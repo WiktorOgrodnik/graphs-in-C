@@ -28,7 +28,11 @@ void ui_init(int argc, char* argv[])
     /* All program Box */
         
         GtkWidget* mainBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        gtk_container_add(GTK_CONTAINER(window), mainBox);
+
+        GtkWidget* windowScroll = gtk_scrolled_window_new(NULL, NULL);
+        gtk_container_add(GTK_CONTAINER(windowScroll), mainBox);
+
+        gtk_container_add(GTK_CONTAINER(window), windowScroll);
 
         gtk_box_pack_start(GTK_BOX(mainBox), menubar, FALSE, FALSE, 0);
 
@@ -103,6 +107,9 @@ void ui_init(int argc, char* argv[])
 
             //Insert button
             GtkWidget* button = gtk_button_new_with_label("Wprowadź");
+
+            gtk_widget_set_margin_start(button, 500);
+            gtk_widget_set_margin_end(button, 70);
             g_signal_connect(G_OBJECT(button), "clicked", G_CALLBACK(calculate), (gpointer)&inputs);
         
             gtk_box_pack_start(GTK_BOX(boxInputs), button, TRUE, TRUE, 0);
@@ -209,12 +216,13 @@ static void ui_init_inputs(eqData* data)
 static void ui_init_window()
 {
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
     g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
 
-    gtk_window_set_default_size(GTK_WINDOW(window), (gint)(600), (gint)200);
+    gtk_window_set_default_size(GTK_WINDOW(window), 900, 1000);
     gtk_window_set_title(GTK_WINDOW(window), "Wykresy");
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-    gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
+    gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
 }
 
 static void destroy (GtkWidget* widget, gpointer data) 
