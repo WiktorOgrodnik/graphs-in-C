@@ -18,7 +18,12 @@ static double exponent(char **inp, double xValue, bool* stop);
 
 //Custom math functions
 static double fractionalPart(double a);
+static double cot(double a);
 
+#define NUMBER_OF_FUNCTIONS 26
+
+static char* nameOfFunctions[NUMBER_OF_FUNCTIONS] = {"sin", "cos", "tan", "tg", "cot", "ctg", "log", "ln", "sqrt", "log10", "log2", "abs", "sinh", "cosh", "tanh", "tgh", "ceil", "floor", "acos", "arccos", "asin", "arcsin", "atan", "arctan", "arctg", "exp"};
+static double (*functions[NUMBER_OF_FUNCTIONS])(double x) = {sin, cos, tan, tan, cot, cot, log, log, sqrt, log10, log2, fabs, sinh, cosh, tanh, tanh, ceil, floor, acos, acos, asin, asin, atan, atan, atan, exp};
 double calc(const char* eqBegin, int eqLength, double calcPoint, bool* stop)
 {
     char begin[eqLength];
@@ -138,29 +143,19 @@ static double read_value(char **inp, double xValue, bool* stop)
             it++;
         }
         function[it] = '\0';
+        
+        bool found = false;
+        for (int i = 0; i < NUMBER_OF_FUNCTIONS && !found; i++)
+        {
+            if (strcmp(function, nameOfFunctions[i]) == 0) 
+            {
+                found = true;
+                if (isNum) n *= functions[i](expression(inp, xValue, stop));
+                else n = functions[i](expression(inp, xValue, stop));
+            }
+        }
 
-        int ncopy = n;
-
-        //Function switch - to-do: pointers to function
-        if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue, stop)); 
-        else if (strcmp(function, "cos") == 0) n = cos(expression(inp, xValue, stop));
-        else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) n = tan(expression(inp, xValue, stop));
-        else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) n = 1 / tan(expression(inp, xValue, stop));
-        else if (strcmp(function, "log") == 0 || strcmp(function, "ln") == 0) n = log(expression(inp, xValue, stop));
-        else if (strcmp(function, "sqrt") == 0) n = sqrt(expression(inp, xValue, stop));
-        else if (strcmp(function, "log10") == 0) n = log10(expression(inp, xValue, stop));
-        else if (strcmp(function, "log2") == 0) n = log2(expression(inp, xValue, stop));
-        else if (strcmp(function, "abs") == 0) n = fabs(expression(inp, xValue, stop));
-        else if (strcmp(function, "sinh") == 0) n = sinh(expression(inp, xValue, stop));
-        else if (strcmp(function, "cosh") == 0) n = cosh(expression(inp, xValue, stop));
-        else if (strcmp(function, "tanh") == 0 || strcmp(function, "tgh") == 0) n = tanh(expression(inp, xValue, stop));
-        else if (strcmp(function, "ceil") == 0) n = ceil(expression(inp, xValue, stop));
-        else if (strcmp(function, "floor") == 0) n = floor(expression(inp, xValue, stop));
-        else if (strcmp(function, "acos") == 0 || strcmp(function, "arccos") == 0) n = acos(expression(inp, xValue, stop));
-        else if (strcmp(function, "asin") == 0 || strcmp(function, "arcsin") == 0) n = asin(expression(inp, xValue, stop));
-        else if (strcmp(function, "atan") == 0 || strcmp(function, "arctan") == 0 || strcmp(function, "arctg") == 0) n = atan(expression(inp, xValue, stop));
-        else if (strcmp(function, "exp") == 0) n = exp(expression(inp, xValue, stop));
-        else 
+        if (!found)
         {
             sprintf(error, "Error: Can not find: %s\n", function);
 	        error_dialog(error);
@@ -180,7 +175,30 @@ static double read_value(char **inp, double xValue, bool* stop)
             return nan("STOP");
         }
 
-        if (isNum) n *= ncopy;
+        //Function switch - to-do: pointers to function
+        /*if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue, stop)); 
+        else if (strcmp(function, "cos") == 0) n = cos(expression(inp, xValue, stop));
+        else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) n = tan(expression(inp, xValue, stop));
+        else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) n = 1 / tan(expression(inp, xValue, stop));
+        else if (strcmp(function, "log") == 0 || strcmp(function, "ln") == 0) n = log(expression(inp, xValue, stop));
+        else if (strcmp(function, "sqrt") == 0) n = sqrt(expression(inp, xValue, stop));
+        else if (strcmp(function, "log10") == 0) n = log10(expression(inp, xValue, stop));
+        else if (strcmp(function, "log2") == 0) n = log2(expression(inp, xValue, stop));
+        else if (strcmp(function, "abs") == 0) n = fabs(expression(inp, xValue, stop));
+        else if (strcmp(function, "sinh") == 0) n = sinh(expression(inp, xValue, stop));
+        else if (strcmp(function, "cosh") == 0) n = cosh(expression(inp, xValue, stop));
+        else if (strcmp(function, "tanh") == 0 || strcmp(function, "tgh") == 0) n = tanh(expression(inp, xValue, stop));
+        else if (strcmp(function, "ceil") == 0) n = ceil(expression(inp, xValue, stop));
+        else if (strcmp(function, "floor") == 0) n = floor(expression(inp, xValue, stop));
+        else if (strcmp(function, "acos") == 0 || strcmp(function, "arccos") == 0) n = acos(expression(inp, xValue, stop));
+        else if (strcmp(function, "asin") == 0 || strcmp(function, "arcsin") == 0) n = asin(expression(inp, xValue, stop));
+        else if (strcmp(function, "atan") == 0 || strcmp(function, "arctan") == 0 || strcmp(function, "arctg") == 0) n = atan(expression(inp, xValue, stop));
+        else if (strcmp(function, "exp") == 0) n = exp(expression(inp, xValue, stop));
+        else 
+        {
+            
+        }*/
+
         c = NUMBER;
     }
 
@@ -329,4 +347,10 @@ static double exponent(char **inp, double xValue, bool* stop) //exponent can be 
 static double fractionalPart(double a)
 {
     return a - floor(a);
+}
+
+static double cot(double a)
+{
+    if (tan(a) == 0) return nan("out");
+    return 1 / tan(a);
 }

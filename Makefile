@@ -2,7 +2,7 @@ CC = gcc
 SRC_DIR = ./source
 INC_DIR = .
 OBJ_DIR = .
-CFLAGS = -std=c11 -Wall -Wextra -Wno-unused-parameter
+CFLAGS = -std=c11 -Wall -Wextra -Werror -Wno-unused-parameter
 GTK = `pkg-config --cflags --libs gtk+-3.0` -lm
 LIBS = `pkg-config --libs gtk+-3.0` -lm
 NAME = wykresy

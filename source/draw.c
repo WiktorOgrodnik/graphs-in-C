@@ -158,7 +158,7 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
         {
             if (color == 0) put_pixel(data->chartData, column, i, 0, 0, 255, 255);
             else if (color == 1) put_pixel(data->chartData, column, i, 255, 0, 0, 255);
-            else if (color == 1) put_pixel(data->chartData, column, i, 0, 255, 0, 255);
+            else if (color == 2) put_pixel(data->chartData, column, i, 0, 255, 0, 255);
             else put_pixel(data->chartData, column, i, 125, 27, 186, 255);
         }
     }
