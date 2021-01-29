@@ -29,31 +29,32 @@ void draw_chart (GtkWidget *widget, eqData* data)
     for (gint i = 0; i < 4; i++)
     {
         for (gint j = 0; j < r; j++)
-            wyniki[i][j] = nan("default");
+            wyniki[i][j] = nan("out");
     }
 
     data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
     put_lines_to_chart(data->chartData, l, p);
 
-    for (gint k = 3; k >= 0; k--)
+    for (gint i = 3; i >= 0; i--)
     {
-        for (gint i = 0; i < r; i++)
+        for (gint j = 0; j < r; j++)
         {
-            equation = gtk_entry_get_text(GTK_ENTRY(data->equation[k]));
-            if (strlen(equation) == 0) break;
+            equation = gtk_entry_get_text(GTK_ENTRY(data->equation[i]));
+            if (strlen(equation) == 0) 
+                break;
 
             bool stop = false;
             double wynik = calc(equation, strlen(equation), l, &stop);
-            if (stop) continue;
+            if (stop) break;
 
-            wyniki[k][i] = wynik;
+            wyniki[i][j] = wynik;
 
             if (!isnan(wynik) && wynik > max) max = wynik;
             l+=delta;
         }
+        l = lorg;
     }
     
-
     max += max * 0.4;
     if (max > 300) max = 300;
 
@@ -158,7 +159,7 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
             if (color == 0) put_pixel(data->chartData, column, i, 0, 0, 255, 255);
             else if (color == 1) put_pixel(data->chartData, column, i, 255, 0, 0, 255);
             else if (color == 1) put_pixel(data->chartData, column, i, 0, 255, 0, 255);
-            else put_pixel(data->chartData, column, i, 255, 255, 0, 255);
+            else put_pixel(data->chartData, column, i, 125, 27, 186, 255);
         }
     }
 }

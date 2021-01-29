@@ -73,9 +73,14 @@ static double read_value(char **inp, double xValue, bool* stop)
     char error[100];
     int c;
     double n = 0.0, exp10 = 1.0;
+    bool isNum = false;
 
     //Number - calculate part of the total
-    while ((c = *(*inp)++) != '\0' && isdigit(c)) n = 10.0 * n + (c -'0');
+    while ((c = *(*inp)++) != '\0' && isdigit(c)) 
+    {
+        isNum = true;
+        n = 10.0 * n + (c -'0');
+    }
 
     if (c == '.' || c == ',')
     {   
@@ -86,14 +91,16 @@ static double read_value(char **inp, double xValue, bool* stop)
             exp10 *= 10.0;
         }
     }
-    else if(c == 'x') //Variable
+    if(c == 'x') //Variable
     {
-        n = xValue; 
+        if (isNum) n *= xValue;
+        else n = xValue; 
         c = *(*inp)++;
     }
     else if(c == 'e') //e constant
     {
-        n = M_E; 
+        if (isNum) n *= M_E;
+        else n = M_E; 
         c = *(*inp)++; 
     }
     else if(c == 'p')
@@ -101,7 +108,8 @@ static double read_value(char **inp, double xValue, bool* stop)
         c = *(*inp)++;
         if (c == 'i') //pi constant
         {
-            n = M_PI;
+            if (isNum) n *= M_PI;
+            else n = M_PI;
             c = *(*inp)++;
         } 
         else if (c == 'h')
@@ -109,7 +117,8 @@ static double read_value(char **inp, double xValue, bool* stop)
             c = *(*inp)++;
             if (c == 'i') ///phi constant
             {
-                n = 1.618033988749895;
+                if (isNum) n *= 1.618033988749895;
+                else n = 1.618033988749895;
                 c = *(*inp)++;
             }
         }
@@ -129,6 +138,8 @@ static double read_value(char **inp, double xValue, bool* stop)
             it++;
         }
         function[it] = '\0';
+
+        int ncopy = n;
 
         //Function switch - to-do: pointers to function
         if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue, stop)); 
@@ -168,6 +179,8 @@ static double read_value(char **inp, double xValue, bool* stop)
 
             return nan("STOP");
         }
+
+        if (isNum) n *= ncopy;
         c = NUMBER;
     }
 
