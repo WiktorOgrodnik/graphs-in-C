@@ -17,8 +17,8 @@ void draw_chart (GtkWidget *widget, eqData* data)
 
     p = l;
     l *= -1;
-
-    gint lorg = l;
+    
+    gdouble lorg = l;
 
     r = (gint)800;
     delta = (p - l) / (gdouble)r;

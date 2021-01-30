@@ -27,14 +27,16 @@ void ui_init(int argc, char* argv[])
 
     /* All program Box */
         
+        GtkWidget* mainestBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         GtkWidget* mainBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
         GtkWidget* windowScroll = gtk_scrolled_window_new(NULL, NULL);
         gtk_container_add(GTK_CONTAINER(windowScroll), mainBox);
 
-        gtk_container_add(GTK_CONTAINER(window), windowScroll);
+        gtk_box_pack_start(GTK_BOX(mainestBox), menubar, FALSE, FALSE, 0);
+        gtk_box_pack_start(GTK_BOX(mainestBox), windowScroll, TRUE, TRUE, 0);
 
-        gtk_box_pack_start(GTK_BOX(mainBox), menubar, FALSE, FALSE, 0);
+        gtk_container_add(GTK_CONTAINER(window), mainestBox);
 
         /* Box with Legend and the chart */
             GtkWidget* boxLegendAndChart = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
