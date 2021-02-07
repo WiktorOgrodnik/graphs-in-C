@@ -1,5 +1,6 @@
 #include "ui.h"
 
+/*** Local functions declatations ***/
 static void destroy (GtkWidget* widget, gpointer data);
 static void about_run (GtkWidget* widget, gpointer data);
 static void calculate (GtkWidget* widget, gpointer data);
@@ -11,11 +12,18 @@ static GtkWidget* ui_init_menu();
 static void ui_init_inputs(eqData* data);
 static void ui_init_window();
 
-static GtkWidget* window;
-static eqData inputs;
+static GtkWidget* window; // main window
+static eqData inputs; // struct with all important widgets, defined in types.h
 
 void ui_init(int argc, char* argv[])
 {
+    /**
+     * @brief Most important function in app. Definition of all ui elements, defined all events.
+     * Construct a new gtk init object.
+     * 
+     * @return void
+     */
+
     gtk_init(&argc, &argv);
 
     //Init application Window
@@ -106,6 +114,8 @@ void ui_init(int argc, char* argv[])
                 sprintf(labelContent, "f%d(x) = ", i + 1);
                 GtkWidget* label5 = gtk_label_new(labelContent);
 
+                // There will be colored square which will be informing about chart color.
+
                 /*GtkWidget* colorInfoBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
                 cairo_t* cr = cairo_create(NULL);
@@ -147,6 +157,12 @@ void ui_init(int argc, char* argv[])
 
 void error_dialog(const char* message)
 {
+    /**
+     * @brief This function show an error dialog, when the entered euation is incorrect
+     *  
+     * @return void
+     */
+
     GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window),
         GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", message);
     
@@ -155,9 +171,14 @@ void error_dialog(const char* message)
     gtk_widget_destroy(dialog);
 }
 
-// Local functions
 static GtkWidget* ui_init_menu()
 {
+    /**
+     * @brief In this function is defined top menu bar.
+     * 
+     * @return void   
+     */
+
     GtkWidget* menubar = gtk_menu_bar_new();
 
     GtkWidget* file_item = gtk_menu_item_new_with_label("Plik");
@@ -185,13 +206,18 @@ static GtkWidget* ui_init_menu()
 
 static void ui_init_inputs(eqData* data)
 {
-    data->rasterization = true;
-    data->microSampling = false;
+    /**
+     * @brief In this function are defined all enter boxes, checkboxes and suitable labels
+     * 
+     * @return void
+     */
+    data->rasterization = true; // default rasterization option
+    data->microSampling = false; // default micrio sampling option
 
     data->chartLegendLeftBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     data->chartLegendBottomBox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
-    for (gint i = 0; i < 11; i++)
+    for (gint i = 0; i < 11; i++) // initialize legend labels
     {
         data->chartLegendLeft[i] = gtk_label_new("");
         data->chartLegendBottom[i] = gtk_label_new("");
@@ -200,21 +226,23 @@ static void ui_init_inputs(eqData* data)
         gtk_box_pack_start(GTK_BOX(data->chartLegendBottomBox), data->chartLegendBottom[i], FALSE, FALSE, 0);
     }
 
-    for(gint i = 0; i < 10; i++)
+    for(gint i = 0; i < 10; i++) // default legend labels margins
     {
         gtk_widget_set_margin_end(data->chartLegendBottom[i], 65);
         gtk_widget_set_margin_bottom(data->chartLegendLeft[i], 45);
     }
 
+    // fill legend labels with specific values
     draw_make_legend(data->chartLegendLeft, (gdouble)300 / (gdouble)5);
     draw_make_legend(data->chartLegendBottom, (gdouble)10 / (gdouble)5);
 
-    for (gint i = 0; i < 4; i++)
+    for (gint i = 0; i < 4; i++) // initialize entry boxes for exations
     {
         data->equation[i] = gtk_entry_new(); 
         gtk_entry_set_max_length(GTK_ENTRY(data->equation[i]), (gint)1000);
     }
     
+    // initalize entry boxes for properties
     data->interval = gtk_entry_new(); data->res = gtk_entry_new();
     
     gtk_entry_set_max_length(GTK_ENTRY(data->interval), (gint)20);
@@ -222,18 +250,21 @@ static void ui_init_inputs(eqData* data)
     gtk_entry_set_max_length(GTK_ENTRY(data->res), (gint)20);
     gtk_entry_set_width_chars(GTK_ENTRY(data->res), (gint)20);
 
-    gtk_widget_set_size_request(data->res, 50, -1);
+    //gtk_widget_set_size_request(data->res, 50, -1);
 
+    // properites entry boxes default values
     gtk_entry_set_text(GTK_ENTRY(data->interval), "10.0");
     gtk_entry_set_text(GTK_ENTRY(data->res), "30.0");
 
     gtk_widget_set_margin_end(data->res, (gint)300);
 
+    // intialize chart
     data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
     put_lines_to_chart(data->chartData, -10.0, 10.0);
     data->chart = gtk_image_new_from_pixbuf(data->chartData);
     gtk_widget_set_margin_top(data->chart, 4);
 
+    // intialize settings checkboxes
     data->rasterizationCheckBox = gtk_check_button_new();
     data->experimentalMicroSamplingCheckBox = gtk_check_button_new();
 
@@ -245,6 +276,12 @@ static void ui_init_inputs(eqData* data)
 
 static void ui_init_window()
 {
+    /**
+     * @brief initialize main window
+     * 
+     * @return void
+     */
+
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
     g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
@@ -257,11 +294,22 @@ static void ui_init_window()
 
 static void destroy (GtkWidget* widget, gpointer data) 
 {
+    /**
+     * @brief Exit
+     * 
+     * @return void
+     */
+
     gtk_main_quit();
 }
 
 static void about_run (GtkWidget* widget, gpointer data)
 {
+    /**
+     * @brief this function display about window
+     * 
+     * @return void
+     */
     const char license[] = "MIT License\n\nCopyright (c) 2021 Wiktor Ogrodnik\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n";
 
     GtkWidget* about = gtk_about_dialog_new();
@@ -276,11 +324,23 @@ static void about_run (GtkWidget* widget, gpointer data)
 
 static void calculate (GtkWidget *widget, gpointer data) 
 {
+    /**
+     * @brief Draw new chart
+     * 
+     * @return void
+     */
+    
     draw_chart(widget, (eqData*)data);
 }
 
 static void checkbox_rasterization_toggle(GtkWidget* widget, gpointer data)
 {
+    /**
+     * @brief this function operate rasterization checkbox
+     * 
+     * @return void
+     */
+
     eqData* localData = (eqData*)data;
 
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
@@ -291,6 +351,12 @@ static void checkbox_rasterization_toggle(GtkWidget* widget, gpointer data)
 
 static void checkbox_experimental_toggle(GtkWidget* widget, gpointer data)
 {
+    /**
+     * @brief this function operate micro sampling checkbox
+     * 
+     * @return void
+     */
+
     eqData* localData = (eqData*)data;
     
     if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))

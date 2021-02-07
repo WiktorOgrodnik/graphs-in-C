@@ -1,5 +1,6 @@
 #include "draw.h"
 
+/*** Local functions declarations ***/
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
 static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color);
 
@@ -9,9 +10,11 @@ void draw_chart (GtkWidget *widget, eqData* data)
     gdouble l, p, delta, scale;
     gint r;
 
+    //get text from GtkEntry
     interval = gtk_entry_get_text(GTK_ENTRY(data->interval));
     scale_ = gtk_entry_get_text(GTK_ENTRY(data->res));
 
+    //convert string to double
     if (strcmp(interval, "") == 0) l = 10.0;
     else l = char_to_double(interval);
 
@@ -23,33 +26,35 @@ void draw_chart (GtkWidget *widget, eqData* data)
     r = (gint)800;
     delta = (p - l) / (gdouble)r;
 
-    gdouble wyniki[4][r];
+    gdouble results[4][r];
     gdouble max = -800.0;
 
+    //initialize array with results (one for each equation)
     for (gint i = 0; i < 4; i++)
     {
         for (gint j = 0; j < r; j++)
-            wyniki[i][j] = nan("out");
+            results[i][j] = nan("out");
     }
 
     data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
     put_lines_to_chart(data->chartData, l, p);
 
+    //The loop is run 4 times, once for each equation 
     for (gint i = 3; i >= 0; i--)
     {
-        for (gint j = 0; j < r; j++)
+        for (gint j = 0; j < r; j++) //r = 800 - chart width 
         {
             equation = gtk_entry_get_text(GTK_ENTRY(data->equation[i]));
             if (strlen(equation) == 0) 
                 break;
 
             bool stop = false;
-            double wynik = calc(equation, strlen(equation), l, &stop);
-            if (stop) break;
+            double result = calc(equation, strlen(equation), l, &stop); //calculate the equation by substituting for x point l
+            if (stop) break; //if stop, there was syntax error in equation
 
-            wyniki[i][j] = wynik;
+            results[i][j] = result;
 
-            if (!isnan(wynik) && wynik > max) max = wynik;
+            if (!isnan(result) && result > max) max = result;
             l+=delta;
         }
         l = lorg;
@@ -61,6 +66,7 @@ void draw_chart (GtkWidget *widget, eqData* data)
     if (strcmp(scale_, "") == 0) scale = 300 / max;
     else scale = char_to_double(scale_);
 
+    //Match the legend with an interval and scale
     draw_make_legend(data->chartLegendLeft, (300.0/scale) / 5.0);
     draw_make_legend(data->chartLegendBottom, p / 5.0);
 
@@ -81,18 +87,18 @@ void draw_chart (GtkWidget *widget, eqData* data)
     {
         for (gint i = 0; i < r; i++) 
         {
-            wyniki[k][i] = (gint)(300 - (wyniki[k][i]) * scale);
+            results[k][i] = (gint)(300 - (results[k][i]) * scale);
 
-            if (!isnan(wyniki[k][i]) && wyniki[k][i] >=0 && wyniki[k][i] <= 600) 
+            if (!isnan(results[k][i]) && results[k][i] >=0 && results[k][i] <= 600) 
             {
-                if (k == 0) put_pixel(data->chartData, i, wyniki[k][i], 0, 0, 255, 255);
-                else if (k == 1) put_pixel(data->chartData, i, wyniki[k][i], 255, 0, 0, 255);
-                else if (k == 2) put_pixel(data->chartData, i, wyniki[k][i], 0, 255, 0, 255);
-                else put_pixel(data->chartData, i, wyniki[k][i], 125, 27, 186, 255);
+                if (k == 0) put_pixel(data->chartData, i, results[k][i], 0, 0, 255, 255);
+                else if (k == 1) put_pixel(data->chartData, i, results[k][i], 255, 0, 0, 255);
+                else if (k == 2) put_pixel(data->chartData, i, results[k][i], 0, 255, 0, 255);
+                else put_pixel(data->chartData, i, results[k][i], 125, 27, 186, 255);
             }
 
-            if (i && !isnan(wyniki[k][i]) && data->rasterization)
-                draw_rasterizaton(data, wyniki[k], i, lorg, delta, k);
+            if (i && !isnan(results[k][i]) && data->rasterization)
+                draw_rasterizaton(data, results[k], i, lorg, delta, k);
         }
     }
     
@@ -135,6 +141,7 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
     bool stopRast = false;
     gdouble sampling[2341];
 
+    //Micro sampling algorithm
     if (end - start >= 2 && end - start < 400 && data->microSampling)
     {
         const gchar* equation = gtk_entry_get_text(GTK_ENTRY(data->equation[color]));
@@ -152,6 +159,7 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
         }
     }
 
+    //Rasterization
     if (end - start >= 2 && end - start < 400 && !stopRast)
     {
         for (gint i = start; i < end; i++)
@@ -164,6 +172,7 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
     }
 }
 
+//Draw lines on chart
 void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
 {
     for (gint i = 0; i < 800; i++)
