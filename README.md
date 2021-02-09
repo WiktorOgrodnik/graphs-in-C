@@ -29,8 +29,9 @@ Technologie użyte do stworzenia programu to:
 
 1. poprzez wbudowany w dystrybucje menedżer pakietów pobrać i zainstalować pakiet 'libgtk-3-dev' wraz z pakietmai zależnymi;
 2. jeżeli nie są zainstalowane, przez wbudowany w dytrybucje menedżer pakietów pobrać kompilator gcc i program make;
-3. w terminalu odnaleźć folder z kodem źródłowym i wpisać polecenie 'make';
-4. uruchomić program poleceniem ./wykresy.
+3. w pliku types.h w 4 linijce zmienić '#define WINDOWS' na '#define LINUX';
+4. w terminalu odnaleźć folder z kodem źródłowym i wpisać polecenie 'make';
+5. uruchomić program poleceniem ./wykresy.
 
 ## Równania matematyczne
 
