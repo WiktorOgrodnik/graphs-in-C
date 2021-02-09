@@ -5,7 +5,8 @@ static void reverse(char* str, int len);
 static int int_to_string(int a, char str[], int d);
 
 void double_to_char(double a, int afterpoint, char str[])
-{ 
+{
+
     int ipart = (int)a; 
     double dpart = a - (double)ipart; 
   
@@ -68,6 +69,10 @@ static int int_to_string(int a, char str[], int d)
 
 static void reverse(char* str, int len) 
 { 
+    /**
+     * @brief reverse string
+     * 
+     */
     int i = 0, j = len - 1, temp; 
     while (i < j) { 
         temp = str[i]; 

@@ -73,6 +73,7 @@ Technologie użyte do stworzenia programu to:
 
 W tej sekcji opiszę jakie możliwości daje intepreter poleceń matematycznych wbudowany w program i jak konstruować zapytania. W programie można wpisać na raz 4 równania, które będą wyświetlane jednocześnie na wykresie.
 
+Wykresy mają różne kolory, odpowiednio niebieski, czerwony, zielony i fioletowy
 \subsection{Składnia}
 \begin{itemize}
     \item liczby
@@ -149,7 +150,7 @@ Dostepne operatory:
     \item x+y - dodawanie $x+y$
     \item x-y - odejmowanie $x-y$
     \item x*y - mnożenie $x*y$
-    \item x/y - dzielenie $x/y$
+    \item x/y - dzielenie $\frac{x}{y}$
     \item x\^{}y - potęgowanie $x^y$ 
 \end{itemize}
 
@@ -160,7 +161,7 @@ Jeżeli operatory mają ten sam priorytet wykonywane są od lewej do prawej, wyj
 Polecenie 'x\^{}y\^{}z' jest interpretowanie jako $x^{y^z}$. 
 Ale 'x\^{}y\^{}z*a' jest interpretowanie jako $x^{y^z} \times a$. Dlatego zalecane jest stosowanie nawiasów, żeby uniknąć nieporozumień.
 
-Czasem niewymagane jest pisanie znaku mnożenia. Np. '2x' intepretowane jest jako '2 * x', 2(x + 3) interpretowane jest jako 2*(x+3).
+Czasem niewymagane jest pisanie znaku mnożenia. Np. '2x' intepretowane jest jako '2 * x'.
 
 Jako x i y można podstawić zmienną, stałe, liczby, wyrażenie w nawiasach lub funkcje.
 
