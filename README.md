@@ -2,6 +2,8 @@
 
 ## Opis programu
 
+![Screen programu](./docs/img2.png)
+
 Program wykresy służy do rysowania wykresów jednej zmiennej w zadanym przedziale. Wykres rysuje się w górnej części programu po naciśnięciu przycisku wprowadź. Program posiada zaawansowany interpreter obsługujący operatory matematyczne, funkcje takie jak sinus czy logarytm, kolejność wykonywania działań, dowolną ilość nawiasów oraz stałe matematyczne. Moduł wyświetlający wykres na ekranie ma zaimplementowany system prostej rasteryzacji, dzięki czemu nawet wykresy skomplikowanych funkcji prezentują się w przystępny sposób. Wspierane systemy operacyjne to Windows 10 i Linux.
 
 ### Technologie
@@ -108,9 +110,6 @@ Operatory mają różne priorytety. Najpierw wykonywane jest potęgowanie, potem
 
 Jeżeli operatory mają ten sam priorytet wykonywane są od lewej do prawej, wyjątkiem jest potęgowanie, które wykonuje się w drugą stronę.
 
-Polecenie 'x\^{}y\^{}z' jest interpretowanie jako $x^{y^z}$.
-Ale 'x\^{}y\^{}z*a' jest interpretowanie jako $x^{y^z} \times a$. Dlatego zalecane jest stosowanie nawiasów, żeby uniknąć nieporozumień.
-
 Czasem niewymagane jest pisanie znaku mnożenia. Np. '2x' intepretowane jest jako '2 * x'.
 
 Jako x i y można podstawić zmienną, stałe, liczby, wyrażenie w nawiasach lub funkcje.
@@ -127,16 +126,6 @@ Poprawne wyrażenia matematyczne w programie:
 Wszystkie wyrażenia matematyczne można skonstruować według powyższej zasady.
 
 W zapytaniach można używać dowolnej liczby spacji lub nie używać jej wcale, wyjątkiem są spacje wewnątrz liczby, nazwy funkcji lub stałej, które są niedozwolone.
-
-### Przykłady równań
-
-W tym dziale zawarłem konkretne przykłady funkcji jednej zmiennej i wyjaśnienie jak będą zinterpretowane przez program.
-
-- 2 + x => $2 + x$
-- sin(x\^{}2/10+5\^{}2\^{}(x)) => sin$(\frac{x^2}{10} + 5^{2^x})$
-- cos(x)\^{}2 - 10/x*2 => $cos^2 (x) - \frac{10}{x} * 2$
-- cos(x)\^{}2 - 10/(x*2) => $cos^2 (x) - \frac{10}{2x}$
-- 10 + (2 + 3) - floor(x\^{}2)\^{}2 => $10 + (2 + 3) - floor^2(x^2)$
 
 ## Ustawienia
 
