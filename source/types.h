@@ -9,6 +9,9 @@
 #define _GNU_SOURCE
 #endif
 
+#define CHART_WIDTH 800
+#define CHART_HEIGHT 600
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <ctype.h>

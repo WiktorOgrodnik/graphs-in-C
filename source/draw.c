@@ -8,8 +8,7 @@ void draw_chart (GtkWidget *widget, eqData* data, char* error_message)
 {
     const gchar* equation, *interval, *scale_;
     gdouble l, p, delta, scale;
-    gint r;
-
+    
     //get text from GtkEntry
     interval = gtk_entry_get_text(GTK_ENTRY(data->interval));
     scale_ = gtk_entry_get_text(GTK_ENTRY(data->res));
@@ -18,31 +17,31 @@ void draw_chart (GtkWidget *widget, eqData* data, char* error_message)
     if (strcmp(interval, "") == 0) l = 10.0;
     else l = char_to_double(interval);
 
+    if (strcmp(scale_, "") == 0) scale = 1;
+    else scale = char_to_double(scale_);
+
     p = l;
     l *= -1;
     
     gdouble lorg = l;
+    delta = (p - l) / CHART_WIDTH;
 
-    r = (gint)800;
-    delta = (p - l) / (gdouble)r;
-
-    gdouble results[4][r];
-    gdouble max = -800.0;
+    gdouble results[4][CHART_WIDTH];
 
     //initialize array with results (one for each equation)
     for (gint i = 0; i < 4; i++)
     {
-        for (gint j = 0; j < r; j++)
+        for (gint j = 0; j < CHART_WIDTH; j++)
             results[i][j] = nan("out");
     }
 
-    data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
+    data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, CHART_WIDTH, CHART_HEIGHT);
     put_lines_to_chart(data->chartData, l, p);
 
     //The loop is run 4 times, once for each equation 
     for (gint i = 3; i >= 0; i--)
     {
-        for (gint j = 0; j < r; j++) //r = 800 - chart width 
+        for (gint j = 0; j < CHART_WIDTH; j++)
         {
             equation = gtk_entry_get_text(GTK_ENTRY(data->equation[i]));
             if (strlen(equation) == 0) 
@@ -50,6 +49,7 @@ void draw_chart (GtkWidget *widget, eqData* data, char* error_message)
 
             int error = 0;
             char message[100];
+            error_message[0] = message[0] = '\0';
 
             double result = calc(equation, strlen(equation), l, &error, message); //calculate the equation by substituting for x point l
             if (error) //if error, there was syntax error in equation
@@ -69,27 +69,21 @@ void draw_chart (GtkWidget *widget, eqData* data, char* error_message)
                         return;
                     break;
                     default:
+                        sprintf(error_message, "Error: Unknown error!");
+                        return;
                     break;
                 }
                 
             } 
 
             results[i][j] = result;
-
-            if (!isnan(result) && result > max) max = result;
             l+=delta;
         }
         l = lorg;
     }
-    
-    max += max * 0.4;
-    if (max > 300) max = 300;
-
-    if (strcmp(scale_, "") == 0) scale = 300 / max;
-    else scale = char_to_double(scale_);
 
     //Match the legend with an interval and scale
-    draw_make_legend(data->chartLegendLeft, (300.0/scale) / 5.0);
+    draw_make_legend(data->chartLegendLeft, ((gdouble)(CHART_HEIGHT/2)/scale) / 5.0);
     draw_make_legend(data->chartLegendBottom, p / 5.0);
 
     //for(gint i = 0; i < 10; i++)
@@ -107,11 +101,11 @@ void draw_chart (GtkWidget *widget, eqData* data, char* error_message)
     //draw and rasterization
     for (gint k = 3; k >= 0; k--)
     {
-        for (gint i = 0; i < r; i++) 
+        for (gint i = 0; i < CHART_WIDTH; i++) 
         {
-            results[k][i] = (gint)(300 - (results[k][i]) * scale);
+            results[k][i] = (gint)((CHART_HEIGHT / 2) - (results[k][i]) * scale);
 
-            if (!isnan(results[k][i]) && results[k][i] >=0 && results[k][i] <= 600) 
+            if (!isnan(results[k][i]) && results[k][i] >=0 && results[k][i] <= CHART_HEIGHT) 
             {
                 if (k == 0) put_pixel(data->chartData, i, results[k][i], 0, 0, 255, 255);
                 else if (k == 1) put_pixel(data->chartData, i, results[k][i], 255, 0, 0, 255);
@@ -164,7 +158,7 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
     gdouble sampling[2341];
 
     //Micro sampling algorithm
-    if (end - start >= 2 && end - start < 400 && data->microSampling)
+    if (end - start >= 2 && end - start < (CHART_HEIGHT / 2) && data->microSampling)
     {
         const gchar* equation = gtk_entry_get_text(GTK_ENTRY(data->equation[color]));
 
@@ -183,7 +177,7 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
     }
 
     //Rasterization
-    if (end - start >= 2 && end - start < 400 && !stopRast)
+    if (end - start >= 2 && end - start < (CHART_WIDTH / 2) && !stopRast)
     {
         for (gint i = start; i < end; i++)
         {
@@ -198,45 +192,45 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
 //Draw lines on chart
 void put_lines_to_chart(GdkPixbuf* pixbuf, gdouble l, gdouble p)
 {
-    for (gint i = 0; i < 800; i++)
+    for (gint i = 0; i < CHART_WIDTH; i++)
     {
-        for (gint j = 0; j < 600; j++)
+        for (gint j = 0; j < CHART_HEIGHT; j++)
         {
-            if (j % 60 == 0 && j) put_pixel(pixbuf, i, j, 0, 0, 0, 127);
-            else if (j % 12 == 0 && j) put_pixel(pixbuf, i, j, 0, 0, 0, 63);
+            if (j % (CHART_HEIGHT / 10) == 0 && j) put_pixel(pixbuf, i, j, 0, 0, 0, 127);
+            else if (j % (CHART_HEIGHT / 50) == 0 && j) put_pixel(pixbuf, i, j, 0, 0, 0, 63);
         }
     }
 
-    for (gint i = 0; i < 600; i++)
+    for (gint i = 0; i < CHART_HEIGHT; i++)
     {
-        for (gint j = 0; j < 800; j++)
+        for (gint j = 0; j < CHART_WIDTH; j++)
         {
-            if (j % 80 == 0 && j) put_pixel(pixbuf, j, i, 0, 0, 0, 127);
-            else if (j % 16 == 0 && j) put_pixel(pixbuf, j, i, 0, 0, 0, 63);
+            if (j % (CHART_WIDTH / 10) == 0 && j) put_pixel(pixbuf, j, i, 0, 0, 0, 127);
+            else if (j % (CHART_WIDTH / 50) == 0 && j) put_pixel(pixbuf, j, i, 0, 0, 0, 63);
         }
     }
 
-    for (gint i = 0; i < 800; i++)
+    for (gint i = 0; i < CHART_WIDTH; i++)
     {
-        put_pixel(pixbuf, i, 299, 0, 0, 0, 255);
-        put_pixel(pixbuf, i, 300, 0, 0, 0, 255);
+        put_pixel(pixbuf, i, (CHART_HEIGHT / 2) - 1, 0, 0, 0, 255);
+        put_pixel(pixbuf, i, (CHART_HEIGHT / 2), 0, 0, 0, 255);
     }
 
-    for (gint i = 0; i < 600; i++)
+    for (gint i = 0; i < CHART_HEIGHT; i++)
     {
-        put_pixel(pixbuf, 399, i, 0, 0, 0, 255);
-        put_pixel(pixbuf, 400, i, 0, 0, 0, 255);
+        put_pixel(pixbuf, (CHART_WIDTH / 2) - 1, i, 0, 0, 0, 255);
+        put_pixel(pixbuf, (CHART_WIDTH / 2), i, 0, 0, 0, 255);
     }
 
-    for(int i = 385, j = 15; j >= -15; i++, j--)
+    for(int i = CHART_WIDTH / 2 - 15, j = 15; j >= -15; i++, j--)
     {
         put_pixel(pixbuf, i, abs(j), 0u, 0u, 0u, 255u);
         put_pixel(pixbuf, i, abs(j) - 1, 0u, 0u, 0u, 255u);
         put_pixel(pixbuf, i, abs(j) - 2, 0u, 0u, 0u, 255u);
 
-        put_pixel(pixbuf, 800 - abs(j), i - 100, 0u, 0u, 0u, 255u);
-        put_pixel(pixbuf, 799 - abs(j), i - 100, 0u, 0u, 0u, 255u);
-        put_pixel(pixbuf, 798 - abs(j), i - 100, 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, CHART_WIDTH - abs(j), i - 100, 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, CHART_WIDTH - 1 - abs(j), i - 100, 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, CHART_WIDTH - 2 - abs(j), i - 100, 0u, 0u, 0u, 255u);
     }
 }
 

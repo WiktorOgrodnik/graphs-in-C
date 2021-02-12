@@ -233,7 +233,7 @@ static void ui_init_inputs(eqData* data)
     }
 
     // fill legend labels with specific values
-    draw_make_legend(data->chartLegendLeft, (gdouble)300 / (gdouble)5);
+    draw_make_legend(data->chartLegendLeft, (gdouble)(CHART_HEIGHT / 2) / (gdouble)5);
     draw_make_legend(data->chartLegendBottom, (gdouble)10 / (gdouble)5);
 
     for (gint i = 0; i < 4; i++) // initialize entry boxes for exations
@@ -256,10 +256,10 @@ static void ui_init_inputs(eqData* data)
     gtk_entry_set_text(GTK_ENTRY(data->interval), "10.0");
     gtk_entry_set_text(GTK_ENTRY(data->res), "30.0");
 
-    gtk_widget_set_margin_end(data->res, (gint)300);
+    gtk_widget_set_margin_end(data->res, CHART_HEIGHT / 2);
 
     // intialize chart
-    data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, 800, 600);
+    data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, CHART_WIDTH, CHART_HEIGHT);
     put_lines_to_chart(data->chartData, -10.0, 10.0);
     data->chart = gtk_image_new_from_pixbuf(data->chartData);
     gtk_widget_set_margin_top(data->chart, 4);
@@ -333,7 +333,7 @@ static void calculate (GtkWidget *widget, gpointer data)
     char message [100];
     draw_chart(widget, (eqData*)data, message);
 
-    if (strcmp(message, ""))
+    if (strlen(message))
         error_dialog(message);
 }
 
