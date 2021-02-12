@@ -330,7 +330,11 @@ static void calculate (GtkWidget *widget, gpointer data)
      * @return void
      */
     
-    draw_chart(widget, (eqData*)data);
+    char message [100];
+    draw_chart(widget, (eqData*)data, message);
+
+    if (strcmp(message, ""))
+        error_dialog(message);
 }
 
 static void checkbox_rasterization_toggle(GtkWidget* widget, gpointer data)

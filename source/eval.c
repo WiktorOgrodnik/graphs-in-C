@@ -8,13 +8,13 @@ static void return_char(int c, char **inp);
 static int read_char(char **inp);
 
 //Return number or func(x) or constant
-static double read_value(char **inp, double xValue, bool* stop);
+static double read_value(char **inp, double xValue, int* error, char* message);
 
-//Grammar terminals
-static double expression(char **inp, double xValue, bool* stop);
-static double ingredient(char **inp, double xValue, bool* stop);
-static double factor(char **inp, double xValue, bool* stop);
-static double exponent(char **inp, double xValue, bool* stop);
+//Grammar not terminals
+static double expression(char **inp, double xValue, int* error, char* message);
+static double ingredient(char **inp, double xValue, int* error, char* message);
+static double factor(char **inp, double xValue, int* error, char* message);
+static double exponent(char **inp, double xValue, int* error, char* message);
 
 //Custom math functions
 static double fractionalPart(double a);
@@ -25,15 +25,14 @@ static double cot(double a);
 static char* nameOfFunctions[NUMBER_OF_FUNCTIONS] = {"sin", "cos", "tan", "tg", "cot", "ctg", "log", "ln", "sqrt", "log10", "log2", "abs", "sinh", "cosh", "tanh", "tgh", "ceil", "floor", "acos", "arccos", "asin", "arcsin", "atan", "arctan", "arctg", "exp"};
 static double (*functions[NUMBER_OF_FUNCTIONS])(double x) = {sin, cos, tan, tan, cot, cot, log, log, sqrt, log10, log2, fabs, sinh, cosh, tanh, tanh, ceil, floor, acos, acos, asin, asin, atan, atan, atan, exp};
 
-double calc(const char* eqBegin, int eqLength, double calcPoint, bool* stop)
+double calc(const char* eqBegin, int eqLength, double calcPoint, int* error, char* message)
 {
     char begin[eqLength];
 
     //Copy string to other array
     for (int i = 0; i <= eqLength; i++)
-    {
         begin[i] = *(eqBegin + i);
-    }
+
 
     int c;
     double result;
@@ -44,7 +43,7 @@ double calc(const char* eqBegin, int eqLength, double calcPoint, bool* stop)
     {
         return_char(c, &inptr);
 
-        result = expression(&inptr, calcPoint, stop);
+        result = expression(&inptr, calcPoint, error, message);
     }
 
     return result;
@@ -74,9 +73,8 @@ static int read_char(char **inp)
     return c == 0 ? EOF : c; //If 0 return EOF
 }
 
-static double read_value(char **inp, double xValue, bool* stop)
+static double read_value(char **inp, double xValue, int* error, char* message)
 {
-    char error[100];
     int c;
     double n = 0.0, exp10 = 1.0;
     bool isNum = false;
@@ -139,10 +137,8 @@ static double read_value(char **inp, double xValue, bool* stop)
         function[0] = (char)c;
 
         while ((c = *(*inp)++) != '\0' && c != '(') //Read function name
-        {
-            function[it] = (char)c;
-            it++;
-        }
+            function[it++] = (char)c;
+    
         function[it] = '\0';
         
         bool found = false;
@@ -151,54 +147,26 @@ static double read_value(char **inp, double xValue, bool* stop)
             if (strcmp(function, nameOfFunctions[i]) == 0) 
             {
                 found = true;
-                if (isNum) n *= functions[i](expression(inp, xValue, stop));
-                else n = functions[i](expression(inp, xValue, stop));
+                if (isNum) n *= functions[i](expression(inp, xValue, error, message));
+                else n = functions[i](expression(inp, xValue, error, message));
             }
         }
 
         if (!found)
         {
-            sprintf(error, "Error: Can not find: %s\n", function);
-	        error_dialog(error);
-
-            *stop = true;
+            *error = 1;
+            message = function;
 
             return nan("OUT");
         }
 
         if ((c = read_char(inp)) != ')') 
         {
-            sprintf(error, "Error: Incorrect parenthesis, expected ')'\n");
-	        error_dialog(error);
-
-            *stop = true;
+            *error = 3;
+            sprintf(message, ")");
 
             return nan("STOP");
         }
-
-        //Function switch - to-do: pointers to function
-        /*if (strcmp(function, "sin") == 0) n = sin(expression(inp, xValue, stop)); 
-        else if (strcmp(function, "cos") == 0) n = cos(expression(inp, xValue, stop));
-        else if (strcmp(function, "tan") == 0 || strcmp(function, "tg") == 0) n = tan(expression(inp, xValue, stop));
-        else if (strcmp(function, "cot") == 0 || strcmp(function, "ctg") == 0) n = 1 / tan(expression(inp, xValue, stop));
-        else if (strcmp(function, "log") == 0 || strcmp(function, "ln") == 0) n = log(expression(inp, xValue, stop));
-        else if (strcmp(function, "sqrt") == 0) n = sqrt(expression(inp, xValue, stop));
-        else if (strcmp(function, "log10") == 0) n = log10(expression(inp, xValue, stop));
-        else if (strcmp(function, "log2") == 0) n = log2(expression(inp, xValue, stop));
-        else if (strcmp(function, "abs") == 0) n = fabs(expression(inp, xValue, stop));
-        else if (strcmp(function, "sinh") == 0) n = sinh(expression(inp, xValue, stop));
-        else if (strcmp(function, "cosh") == 0) n = cosh(expression(inp, xValue, stop));
-        else if (strcmp(function, "tanh") == 0 || strcmp(function, "tgh") == 0) n = tanh(expression(inp, xValue, stop));
-        else if (strcmp(function, "ceil") == 0) n = ceil(expression(inp, xValue, stop));
-        else if (strcmp(function, "floor") == 0) n = floor(expression(inp, xValue, stop));
-        else if (strcmp(function, "acos") == 0 || strcmp(function, "arccos") == 0) n = acos(expression(inp, xValue, stop));
-        else if (strcmp(function, "asin") == 0 || strcmp(function, "arcsin") == 0) n = asin(expression(inp, xValue, stop));
-        else if (strcmp(function, "atan") == 0 || strcmp(function, "arctan") == 0 || strcmp(function, "arctg") == 0) n = atan(expression(inp, xValue, stop));
-        else if (strcmp(function, "exp") == 0) n = exp(expression(inp, xValue, stop));
-        else 
-        {
-            
-        }*/
 
         c = NUMBER;
     }
@@ -207,20 +175,20 @@ static double read_value(char **inp, double xValue, bool* stop)
     return n / exp10;
 }
 
-static double expression(char **inp, double xValue, bool* stop) //Expression consist of ingredients and signs '+' and '-'
+static double expression(char **inp, double xValue, int* error, char* message) //Expression consist of ingredients and signs '+' and '-'
 {
     int c;
     double res, x2;
 
     if ((c = read_char(inp)) != '-' && c != '+') return_char(c, inp); //detect sign of ingredient
 
-    res = ingredient(inp, xValue, stop); //find next ingredient
+    res = ingredient(inp, xValue, error, message); //find next ingredient
 
     if (c == '-') res *= -1; //if it was negative ingredient multiply by -1 
 
     while ((c = read_char(inp)) == '+' || c == '-') //if the next character is '+' or '-' calculate the expression
     {
-        x2 = ingredient(inp, xValue, stop); //find next ingredient
+        x2 = ingredient(inp, xValue, error, message); //find next ingredient
         res = (c == '+' ? res + x2 : res - x2);
     }
 
@@ -228,15 +196,15 @@ static double expression(char **inp, double xValue, bool* stop) //Expression con
     return res;
 }
 
-static double ingredient(char **inp, double xValue, bool* stop) //ingredient consist of factors and sings '*' and '/'
+static double ingredient(char **inp, double xValue, int* error, char* message) //ingredient consist of factors and sings '*' and '/'
 {
     int c;
     double res, x2;
 
-    res = factor(inp, xValue, stop); //Find next factor
+    res = factor(inp, xValue, error, message); //Find next factor
     while ((c = read_char(inp)) == '*' || c == '/') //if the next character is '*' or '/' calculate the ingredient
     {
-        x2 = factor(inp, xValue, stop); //Find next factor
+        x2 = factor(inp, xValue, error, message); //Find next factor
 
         if (c == '*') res *= x2;
         else
@@ -250,15 +218,15 @@ static double ingredient(char **inp, double xValue, bool* stop) //ingredient con
     return res;
 }
 
-static double factor(char **inp, double xValue, bool* stop) //factors consist of exponents and sign '^'
+static double factor(char **inp, double xValue, int* error, char* message) //factors consist of exponents and sign '^'
 {
     int c;
     double res, x2;
 
-    res = exponent(inp, xValue, stop); //find next exponent
+    res = exponent(inp, xValue, error, message); //find next exponent
     while ((c = read_char(inp)) == '^') //if the next character is '^' calculate the factor
     {
-        x2 = factor(inp, xValue, stop); //find next factor (becouse the stange order of actions with ^ sign)
+        x2 = factor(inp, xValue, error, message); //find next factor (becouse the stange order of actions with ^ sign)
 
         if (res || x2) res = pow(res, x2);
         else return nan("OUT");
@@ -268,79 +236,67 @@ static double factor(char **inp, double xValue, bool* stop) //factors consist of
     return res;
 }
 
-static double exponent(char **inp, double xValue, bool* stop) //exponent can be number or function or variable or constant or parentheses '()', '{}', '||', '[]'
+static double exponent(char **inp, double xValue, int* error, char* message) //exponent can be number or function or variable or constant or parentheses '()', '{}', '||', '[]'
 {
     int c;
     double res;
-    char error[100];
 
-    if ((c = read_char(inp)) == NUMBER) return read_value(inp, xValue, stop); //if the next character is number, function, constant or variable read value
+    if ((c = read_char(inp)) == NUMBER) return read_value(inp, xValue, error, message); //if the next character is number, function, constant or variable read value
     else if (c == '(') // normal parenthesis, calculate the value in parentheses
     {
-        res = expression(inp, xValue, stop);
+        res = expression(inp, xValue, error, message);
 
         if ((c = read_char(inp)) == ')') return res;
         else 
         {
-	        sprintf(error, "Error: expected ')'\n");
-	        error_dialog(error);
-
-            *stop = true;
+            *error = 3;
+            sprintf(message, ")");
 
             return nan("STOP");
         }
     }
     else if (c == '|') // the absolute value, calculate the absolute value in parentheses
     {
-        res = fabs(expression(inp, xValue, stop));
+        res = fabs(expression(inp, xValue, error, message));
 
         if ((c = read_char(inp)) == '|') return res;
         else 
         {
-	        sprintf(error, "Error: expected ')'\n");
-	        error_dialog(error);
-
-            *stop = true;
+            *error = 3;
+            sprintf(message, "|");
 
             return nan("STOP");
         }
     }
     else if (c == '{') // the fractional part, calculate the fractional part of value in parentheses
     {
-        res = fractionalPart(expression(inp, xValue, stop));
+        res = fractionalPart(expression(inp, xValue, error, message));
 
         if ((c = read_char(inp)) == '}') return res;
         else 
         {
-	        sprintf(error, "Error: expected '}'\n");
-	        error_dialog(error);
-
-            *stop = true;
+            *error = 3;
+            sprintf(message, "}");
 
             return nan("STOP");
         }
     }
     else if (c == '[') // floor, calculate floor value in parentheses
     {
-        res = floor(expression(inp, xValue, stop));
+        res = floor(expression(inp, xValue, error, message));
 
         if ((c = read_char(inp)) == ']') return res;
         else 
         {
-	        sprintf(error, "Error: expected ']'\n");
-	        error_dialog(error);
-
-            *stop = true;
+            *error = 3;
+            sprintf(message, "]");
 
             return nan("STOP");
         }
     }
     else //Undefined character
     {
-        sprintf(error, "Error: expected number or '(', or '|', or '{', or '['\n");
-	    error_dialog(error);
-
-        *stop = true;
+        *error = 2;
 
         return nan("STOP");
     }

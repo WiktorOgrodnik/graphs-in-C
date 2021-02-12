@@ -6,7 +6,7 @@
 #ifdef WINDOWS
 #define _USE_MATH_DEFINES
 #else
-#define _GNU_SOURCE 
+#define _GNU_SOURCE
 #endif
 
 #include <stdio.h>

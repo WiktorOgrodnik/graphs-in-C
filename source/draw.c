@@ -4,7 +4,7 @@
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
 static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color);
 
-void draw_chart (GtkWidget *widget, eqData* data) 
+void draw_chart (GtkWidget *widget, eqData* data, char* error_message) 
 {
     const gchar* equation, *interval, *scale_;
     gdouble l, p, delta, scale;
@@ -48,9 +48,31 @@ void draw_chart (GtkWidget *widget, eqData* data)
             if (strlen(equation) == 0) 
                 break;
 
-            bool stop = false;
-            double result = calc(equation, strlen(equation), l, &stop); //calculate the equation by substituting for x point l
-            if (stop) break; //if stop, there was syntax error in equation
+            int error = 0;
+            char message[100];
+
+            double result = calc(equation, strlen(equation), l, &error, message); //calculate the equation by substituting for x point l
+            if (error) //if error, there was syntax error in equation
+            {
+                switch(error)
+                {
+                    case 1:
+                        sprintf(error_message, "Error: Can not find: %s", message);
+                        return;
+                    break;
+                    case 2:
+                        sprintf(error_message, "Error: expected number or '(', or '|', or '{', or '['");
+                        return;
+                    break;
+                    case 3:
+                        sprintf(error_message, "Error: Incorrect parenthesis, expected: %s", message);
+                        return;
+                    break;
+                    default:
+                    break;
+                }
+                
+            } 
 
             results[i][j] = result;
 
@@ -70,8 +92,8 @@ void draw_chart (GtkWidget *widget, eqData* data)
     draw_make_legend(data->chartLegendLeft, (300.0/scale) / 5.0);
     draw_make_legend(data->chartLegendBottom, p / 5.0);
 
-    for(gint i = 0; i < 10; i++)
-    {
+    //for(gint i = 0; i < 10; i++)
+    //{
         //Problem w tym miejscu ->
         //GtkRequisition r;
 
@@ -80,7 +102,7 @@ void draw_chart (GtkWidget *widget, eqData* data)
 
         gint width = 80 - w;
         gtk_widget_set_margin_end(GTK_WIDGET(data->chartLegendBottom[i]), width);*/
-    }
+    //}
 
     //draw and rasterization
     for (gint k = 3; k >= 0; k--)
@@ -148,8 +170,9 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
 
         for (gint i = 0; i <= 2340; i++)
         {
-            bool stop = false;
-            sampling[i] = calc(equation, strlen(equation), l + (delta*(gdouble)(column - 1)) + ((gdouble)(i+30)/2340 * delta), &stop);
+            int error = 0;
+            char message [10];
+            sampling[i] = calc(equation, strlen(equation), l + (delta*(gdouble)(column - 1)) + ((gdouble)(i+30)/2340 * delta), &error, message);
         }
 
         for (gint i = 1; i <= 2340 && !stopRast; i++)
