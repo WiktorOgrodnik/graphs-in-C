@@ -21,9 +21,13 @@ static double fractionalPart(double a);
 static double cot(double a);
 
 #define NUMBER_OF_FUNCTIONS 26
+#define NUMBER_OF_CONSTANTS 3
 
 static char* nameOfFunctions[NUMBER_OF_FUNCTIONS] = {"sin", "cos", "tan", "tg", "cot", "ctg", "log", "ln", "sqrt", "log10", "log2", "abs", "sinh", "cosh", "tanh", "tgh", "ceil", "floor", "acos", "arccos", "asin", "arcsin", "atan", "arctan", "arctg", "exp"};
 static double (*functions[NUMBER_OF_FUNCTIONS])(double x) = {sin, cos, tan, tan, cot, cot, log, log, sqrt, log10, log2, fabs, sinh, cosh, tanh, tanh, ceil, floor, acos, acos, asin, asin, atan, atan, atan, exp};
+
+static char* nameOfConstants[NUMBER_OF_CONSTANTS] = {"e", "pi", "phi"};
+static double constants[NUMBER_OF_CONSTANTS] = {M_E, M_PI, 1.618033988749895};
 
 double calc(const char* eqBegin, int eqLength, double calcPoint, int* error, char* message)
 {
@@ -100,47 +104,19 @@ static double read_value(char** inp, double xValue, int* error, char* message)
         else n = xValue; 
         c = *(*inp)++;
     }
-    else if(c == 'e') //e constant
-    {
-        if (isNum) n *= M_E;
-        else n = M_E; 
-        c = *(*inp)++; 
-    }
-    else if(c == 'p')
-    {
-        c = *(*inp)++;
-        if (c == 'i') //pi constant
-        {
-            if (isNum) n *= M_PI;
-            else n = M_PI;
-            c = *(*inp)++;
-        } 
-        else if (c == 'h')
-        {
-            c = *(*inp)++;
-            if (c == 'i') ///phi constant
-            {
-                if (isNum) n *= 1.618033988749895;
-                else n = 1.618033988749895;
-                c = *(*inp)++;
-            }
-        }
-    }
-    /*
-    To-do: Implement constants module
-    */
     else if (isalpha(c)) // Function module
     {
         int it = 1;
         char function[10];
         function[0] = (char)c;
 
-        while ((c = *(*inp)++) != '\0' && c != '(') //Read function name
+        while ((c = *(*inp)++) != '\0' && c != '(' && !isspace(c) && (isalpha(c) || isdigit(c))) //Read function name
             function[it++] = (char)c;
     
         function[it] = '\0';
         
         bool found = false;
+        bool constant = false;
         for (int i = 0; i < NUMBER_OF_FUNCTIONS && !found; i++) //Find a specific function
         {
             if (strcmp(function, nameOfFunctions[i]) == 0) 
@@ -153,13 +129,29 @@ static double read_value(char** inp, double xValue, int* error, char* message)
 
         if (!found)
         {
-            *error = 1;
-            message = function;
+            for(int i = 0; i < NUMBER_OF_CONSTANTS && !found; i++) //Find a specyfic constant
+            {
+                if(strcmp(function, nameOfConstants[i]) == 0)
+                {
+                    found = true;
+                    constant = true;
+                    if(isNum) n *= constants[i];
+                    else n = constants[i];
 
-            return nan("OUT");
+                    return_char(c, inp);
+                }
+            }
+
+            if (!found)
+            {
+                *error = 1;
+                message = function;
+
+                return nan("OUT");
+            }
         }
 
-        if ((c = read_char(inp)) != ')') 
+        if (!constant && (c = read_char(inp)) != ')') 
         {
             *error = 3;
             sprintf(message, ")");
