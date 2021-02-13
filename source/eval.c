@@ -110,7 +110,7 @@ static double read_value(char** inp, double xValue, int* error, char* message)
         char function[10];
         function[0] = (char)c;
 
-        while ((c = *(*inp)++) != '\0' && c != '(' && !isspace(c) && (isalpha(c) || isdigit(c))) //Read function name
+        while ((c = *(*inp)++) != '\0' && c != '(' && !isspace(c) && (isalpha(c) || isdigit(c))) //Read function or constant name
             function[it++] = (char)c;
     
         function[it] = '\0';

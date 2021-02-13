@@ -12,7 +12,7 @@ static GtkWidget* ui_init_menu();
 static void ui_init_inputs(eqData* data);
 static void ui_init_window();
 
-static GtkWidget* window; // main window
+//static GtkWidget* window; // main window
 static eqData inputs; // struct with all important widgets, defined in types.h
 
 void ui_init(int argc, char* argv[])
@@ -23,8 +23,6 @@ void ui_init(int argc, char* argv[])
      * 
      * @return void
      */
-
-    gtk_init(&argc, &argv);
 
     //Init application Window
     ui_init_window();
@@ -153,6 +151,8 @@ void ui_init(int argc, char* argv[])
 
     gtk_widget_show_all(window);
     gtk_main();
+
+    return;
 }
 
 void error_dialog(const char* message)
@@ -211,7 +211,7 @@ static void ui_init_inputs(eqData* data)
      * 
      * @return void
      */
-    data->rasterization = true; // default rasterization option
+    /*data->rasterization = true; // default rasterization option
     data->microSampling = false; // default micrio sampling option
 
     data->chartLegendLeftBox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -272,9 +272,9 @@ static void ui_init_inputs(eqData* data)
 
     g_signal_connect(data->rasterizationCheckBox, "toggled", G_CALLBACK(checkbox_rasterization_toggle), data);
     g_signal_connect(data->experimentalMicroSamplingCheckBox, "toggled", G_CALLBACK(checkbox_experimental_toggle), data);
-}
+}*/
 
-static void ui_init_window()
+/*static void ui_init_window()
 {
     /**
      * @brief initialize main window
@@ -282,15 +282,15 @@ static void ui_init_window()
      * @return void
      */
 
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    //window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-    g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
+    //g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
 
-    gtk_window_set_default_size(GTK_WINDOW(window), 900, 800);
-    gtk_window_set_title(GTK_WINDOW(window), "Wykresy");
-    gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-    gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
-}
+    //gtk_window_set_default_size(GTK_WINDOW(window), 900, 800);
+    //gtk_window_set_title(GTK_WINDOW(window), "Wykresy");
+    //gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+    //gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
+//}
 
 static void destroy (GtkWidget* widget, gpointer data) 
 {
@@ -300,7 +300,7 @@ static void destroy (GtkWidget* widget, gpointer data)
      * @return void
      */
 
-    gtk_main_quit();
+    //gtk_main_quit();
 }
 
 static void about_run (GtkWidget* widget, gpointer data)
