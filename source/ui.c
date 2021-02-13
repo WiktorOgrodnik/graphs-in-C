@@ -233,7 +233,7 @@ static void ui_init_inputs(eqData* data)
     }
 
     // fill legend labels with specific values
-    draw_make_legend(data->chartLegendLeft, (gdouble)(CHART_HEIGHT / 2) / (gdouble)5);
+    draw_make_legend(data->chartLegendLeft, (gdouble)10 / (gdouble)5);
     draw_make_legend(data->chartLegendBottom, (gdouble)10 / (gdouble)5);
 
     for (gint i = 0; i < 4; i++) // initialize entry boxes for exations
@@ -260,7 +260,7 @@ static void ui_init_inputs(eqData* data)
 
     // intialize chart
     data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, CHART_WIDTH, CHART_HEIGHT);
-    put_lines_to_chart(data->chartData, -10.0, 10.0);
+    put_lines_to_chart(data->chartData);
     data->chart = gtk_image_new_from_pixbuf(data->chartData);
     gtk_widget_set_margin_top(data->chart, 4);
 

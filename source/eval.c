@@ -4,17 +4,17 @@
 /* Definitions */
 
 //Working on chars
-static void return_char(int c, char **inp);
-static int read_char(char **inp);
+static void return_char(int c, char** inp);
+static int read_char(char** inp);
 
 //Return number or func(x) or constant
-static double read_value(char **inp, double xValue, int* error, char* message);
+static double read_value(char** inp, double xValue, int* error, char* message);
 
 //Grammar not terminals
-static double expression(char **inp, double xValue, int* error, char* message);
-static double ingredient(char **inp, double xValue, int* error, char* message);
-static double factor(char **inp, double xValue, int* error, char* message);
-static double exponent(char **inp, double xValue, int* error, char* message);
+static double expression(char** inp, double xValue, int* error, char* message);
+static double ingredient(char** inp, double xValue, int* error, char* message);
+static double factor(char** inp, double xValue, int* error, char* message);
+static double exponent(char** inp, double xValue, int* error, char* message);
 
 //Custom math functions
 static double fractionalPart(double a);
@@ -33,7 +33,6 @@ double calc(const char* eqBegin, int eqLength, double calcPoint, int* error, cha
     for (int i = 0; i <= eqLength; i++)
         begin[i] = *(eqBegin + i);
 
-
     int c;
     double result;
     char* inptr = begin;
@@ -49,12 +48,12 @@ double calc(const char* eqBegin, int eqLength, double calcPoint, int* error, cha
     return result;
 }
 
-static void return_char(int c, char **inp)
+static void return_char(int c, char** inp)
 {
     if (c != EOF && c != NUMBER) --*inp;
 }
 
-static int read_char(char **inp)
+static int read_char(char** inp)
 {
     int c;
     
@@ -73,7 +72,7 @@ static int read_char(char **inp)
     return c == 0 ? EOF : c; //If 0 return EOF
 }
 
-static double read_value(char **inp, double xValue, int* error, char* message)
+static double read_value(char** inp, double xValue, int* error, char* message)
 {
     int c;
     double n = 0.0, exp10 = 1.0;
@@ -175,7 +174,7 @@ static double read_value(char **inp, double xValue, int* error, char* message)
     return n / exp10;
 }
 
-static double expression(char **inp, double xValue, int* error, char* message) //Expression consist of ingredients and signs '+' and '-'
+static double expression(char** inp, double xValue, int* error, char* message) //Expression consist of ingredients and signs '+' and '-'
 {
     int c;
     double res, x2;
@@ -196,7 +195,7 @@ static double expression(char **inp, double xValue, int* error, char* message) /
     return res;
 }
 
-static double ingredient(char **inp, double xValue, int* error, char* message) //ingredient consist of factors and sings '*' and '/'
+static double ingredient(char** inp, double xValue, int* error, char* message) //ingredient consist of factors and sings '*' and '/'
 {
     int c;
     double res, x2;
@@ -218,7 +217,7 @@ static double ingredient(char **inp, double xValue, int* error, char* message) /
     return res;
 }
 
-static double factor(char **inp, double xValue, int* error, char* message) //factors consist of exponents and sign '^'
+static double factor(char** inp, double xValue, int* error, char* message) //factors consist of exponents and sign '^'
 {
     int c;
     double res, x2;
@@ -236,7 +235,7 @@ static double factor(char **inp, double xValue, int* error, char* message) //fac
     return res;
 }
 
-static double exponent(char **inp, double xValue, int* error, char* message) //exponent can be number or function or variable or constant or parentheses '()', '{}', '||', '[]'
+static double exponent(char** inp, double xValue, int* error, char* message) //exponent can be number or function or variable or constant or parentheses '()', '{}', '||', '[]'
 {
     int c;
     double res;
