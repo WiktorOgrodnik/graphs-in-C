@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <menu id="menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_About</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Quit</attribute>
+        <attribute name="action">app.quit</attribute>
+      </item>
+    </section>
+  </menu>
+  <object id="window" class="GtkApplicationWindow">
+    <property name="title">Wykresy</property>
+    <property name="default-width">770</property>
+    <property name="default-height">900</property>
+    <property name="hide-on-close">True</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="header">
+      <property name="decoration-layout">menu:minimize,maximize,close</property>
+        <child type="end">
+          <object class="GtkMenuButton" id="gears">
+            <property name="direction">none</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object id="mainscroll" class="GtkScrolledWindow">
+      <child>
+        <object id="grid" class="GtkGrid">
+          <property name="row-spacing">5</property>
+          <property name="column-spacing">5</property>
+          <property name="margin-top">10</property>
+          <property name="margin-start">10</property>
+          <property name="margin-bottom">10</property>
+          <child>
+            <object id="gridLL" class="GtkGrid">
+            <property name="row-spacing">5</property>
+            <property name="column-spacing">5</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+            </layout>
+            </object>
+          </child>
+          <child>
+            <object id="chart" class="GtkImage">
+            <layout>
+              <property name="column">1</property>
+              <property name="row">0</property>
+              <property name="column-span">9</property>
+            </layout>
+            </object>
+          </child>
+          <child>
+            <object id="gridLB" class="GtkGrid">
+            <property name="row-spacing">5</property>
+            <property name="column-spacing">5</property>
+            <property name="margin-start">60</property>
+            <layout>
+              <property name="column">0</property>
+              <property name="row">1</property>
+              <property name="column-span">10</property>
+            </layout>
+            </object>
+          </child>
+          <child>
+            <object id="label1" class="GtkLabel">
+              <property name="label">Przedział: </property>
+              <layout>
+                <property name="column">0</property>
+                <property name="row">2</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entry1" class="GtkEntry">
+            <property name="max-length">20</property>
+              <layout>
+                <property name="column">1</property>
+                <property name="row">2</property>
+                <property name="column-span">2</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="label2" class="GtkLabel">
+              <property name="label">Skala: </property>
+              <layout>
+                <property name="column">3</property>
+                <property name="row">2</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entry2" class="GtkEntry">
+            <property name="max-length">20</property>
+              <layout>
+                <property name="column">4</property>
+                <property name="row">2</property>
+                <property name="column-span">2</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="label3" class="GtkLabel">
+              <property name="label">Rasteryzacja: </property>
+              <layout>
+                <property name="column">6</property>
+                <property name="row">2</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="checkbox1" class="GtkCheckButton">
+            <property name="active">TRUE</property>
+              <layout>
+                <property name="column">7</property>
+                <property name="row">2</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="label4" class="GtkLabel">
+              <property name="label">Mikropróbkowanie (eksperymentalne): </property>
+              <layout>
+                <property name="column">8</property>
+                <property name="row">2</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="checkbox2" class="GtkCheckButton">
+              <layout>
+                <property name="column">9</property>
+                <property name="row">2</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="labelEquation0" class="GtkLabel">
+              <property name="label">f1(x) = </property>
+              <layout>
+                <property name="column">0</property>
+                <property name="row">3</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entryEquation0" class="GtkEntry">
+            <property name="max-length">1000</property>
+              <layout>
+                <property name="column">1</property>
+                <property name="row">3</property>
+                <property name="column-span">8</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="labelEquation1" class="GtkLabel">
+              <property name="label">f2(x) = </property>
+              <layout>
+                <property name="column">0</property>
+                <property name="row">4</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entryEquation1" class="GtkEntry">
+            <property name="max-length">1000</property>
+              <layout>
+                <property name="column">1</property>
+                <property name="row">4</property>
+                <property name="column-span">8</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="labelEquation2" class="GtkLabel">
+              <property name="label">f3(x) = </property>
+              <layout>
+                <property name="column">0</property>
+                <property name="row">5</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entryEquation2" class="GtkEntry">
+            <property name="max-length">1000</property>
+              <layout>
+                <property name="column">1</property>
+                <property name="row">5</property>
+                <property name="column-span">8</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="labelEquation3" class="GtkLabel">
+              <property name="label">f4(x) = </property>
+              <layout>
+                <property name="column">0</property>
+                <property name="row">6</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entryEquation3" class="GtkEntry">
+            <property name="max-length">1000</property>
+              <layout>
+                <property name="column">1</property>
+                <property name="row">6</property>
+                <property name="column-span">8</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="buttonRun" class="GtkButton">
+              <property name="label">Wprowadź</property>
+              <layout>
+                <property name="column">6</property>
+                <property name="row">7</property>
+                <property name="column-span">3</property>
+              </layout>
+            </object>
+          </child>
+        </object>
+      </child>
+      </object>
+    </child>
+  </object>
+</interface>

@@ -9,8 +9,8 @@
 #define _GNU_SOURCE
 #endif
 
-#define CHART_WIDTH 800
-#define CHART_HEIGHT 600
+#define CHART_WIDTH 600
+#define CHART_HEIGHT CHART_WIDTH
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -21,24 +21,20 @@
 
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include <glib/gstdio.h>
 
 typedef struct eqData_
 {
     //Application elements
-    GtkWidget* equation[4];
-    GtkWidget* interval;
-    GtkWidget* res;
     GtkWidget* chartLegendLeft[11];
     GtkWidget* chartLegendBottom[11];
 
     GdkPixbuf* chartData;
     GtkWidget* chart;
 
-    GtkWidget* chartLegendLeftBox;
-    GtkWidget* chartLegendBottomBox;
-
-    GtkWidget* rasterizationCheckBox;
-    GtkWidget* experimentalMicroSamplingCheckBox;
+    GtkEntryBuffer* intervalBuffer;
+    GtkEntryBuffer* scaleBuffer;
+    GtkEntryBuffer* equationBuffer[4];
 
     //Settings
     bool rasterization;

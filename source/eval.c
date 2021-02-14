@@ -145,7 +145,7 @@ static double read_value(char** inp, double xValue, int* error, char* message)
             if (!found)
             {
                 *error = 1;
-                message = function;
+                sprintf(message, "%s", function);
 
                 return nan("OUT");
             }

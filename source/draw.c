@@ -4,20 +4,20 @@
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
 static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color);
 
-void draw_chart (GtkWidget* widget, eqData* data, char* error_message) 
+void draw_chart (eqData* data, char* error_message) 
 {
     const gchar *equation, *interval, *scale_;
     gdouble l, p, delta, scale;
     
-    //get text from GtkEntry
-    interval = gtk_entry_get_text(GTK_ENTRY(data->interval));
-    scale_ = gtk_entry_get_text(GTK_ENTRY(data->res));
+    //get text from GtkEntryBuffer
+    interval = gtk_entry_buffer_get_text(data->intervalBuffer);
+    scale_ = gtk_entry_buffer_get_text(data->scaleBuffer);
 
     //convert string to double
     if (strcmp(interval, "") == 0) l = 10.0;
     else l = char_to_double(interval);
 
-    if (strcmp(scale_, "") == 0) scale = 30.0;
+    if (strcmp(scale_, "") == 0) scale = 40.0;
     else scale = char_to_double(scale_);
 
     p = l;
@@ -35,18 +35,20 @@ void draw_chart (GtkWidget* widget, eqData* data, char* error_message)
             results[i][j] = nan("out");
     }
 
+    g_object_unref(data->chartData);
     data->chartData = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, CHART_WIDTH, CHART_HEIGHT);
     put_lines_to_chart(data->chartData);
 
     //The loop is run 4 times, once for each equation 
     for (gint i = 3; i >= 0; i--)
     {
+        equation = gtk_entry_buffer_get_text(data->equationBuffer[i]);
+
+        if (!strlen(equation)) 
+                continue;
+
         for (gint j = 0; j < CHART_WIDTH; j++)
         {
-            equation = gtk_entry_get_text(GTK_ENTRY(data->equation[i]));
-            if (!strlen(equation)) 
-                break;
-
             int error = 0;
             char message[100];
             error_message[0] = message[0] = '\0';
@@ -65,7 +67,7 @@ void draw_chart (GtkWidget* widget, eqData* data, char* error_message)
                         return;
                     break;
                     case 3:
-                        sprintf(error_message, "Error: Incorrect parenthesis, expected: %s", message);
+                        sprintf(error_message, "Error: Incorrect parenthesis, expected: '%s'", message);
                         return;
                     break;
                     default:
@@ -85,24 +87,12 @@ void draw_chart (GtkWidget* widget, eqData* data, char* error_message)
     draw_make_legend(data->chartLegendLeft, ((gdouble)(CHART_HEIGHT / 2)/scale) / 5.0);
     draw_make_legend(data->chartLegendBottom, p / 5.0);
 
-    //for(gint i = 0; i < 10; i++)
-    //{
-        //Problem w tym miejscu ->
-        //GtkRequisition r;
-
-        /*gint w;
-        gtk_widget_get_preferred_width(data->chartLegendBottom[i], NULL, &w);
-
-        gint width = 80 - w;
-        gtk_widget_set_margin_end(GTK_WIDGET(data->chartLegendBottom[i]), width);*/
-    //}
-
     //draw and rasterization
     for (gint k = 3; k >= 0; k--)
     {
         for (gint i = 0; i < CHART_WIDTH; i++) 
         {
-            results[k][i] = (gint)((CHART_HEIGHT / 2) - (results[k][i]) * scale);
+            results[k][i] = (gint)((CHART_HEIGHT / 2) - results[k][i] * scale);
 
             if (!isnan(results[k][i]) && results[k][i] >=0 && results[k][i] <= CHART_HEIGHT) 
             {
@@ -159,13 +149,13 @@ static void draw_rasterizaton(eqData* data, gdouble wyniki[], gint column, gdoub
     //Micro sampling algorithm
     if (end - start >= 2 && end - start < (CHART_HEIGHT / 2) && data->microSampling)
     {
-        const gchar* equation = gtk_entry_get_text(GTK_ENTRY(data->equation[color]));
+        const gchar* equation = gtk_entry_buffer_get_text(data->equationBuffer[color]);
 
         for (gint i = 0; i <= 2340; i++)
         {
             int error = 0;
             char message [10];
-            sampling[i] = calc(equation, strlen(equation), l + (delta*(gdouble)(column - 1)) + ((gdouble)(i+30)/2340 * delta), &error, message);
+            sampling[i] = calc(equation, strlen(equation), l + (delta*(gdouble)(column - 1)) + ((gdouble)(i+30)/2340 * delta) - 0.01, &error, message);
         }
 
         for (gint i = 1; i <= 2340 && !stopRast; i++)
@@ -227,9 +217,9 @@ void put_lines_to_chart(GdkPixbuf* pixbuf)
         put_pixel(pixbuf, i, abs(j) - 1, 0u, 0u, 0u, 255u);
         put_pixel(pixbuf, i, abs(j) - 2, 0u, 0u, 0u, 255u);
 
-        put_pixel(pixbuf, CHART_WIDTH - abs(j), i - 100, 0u, 0u, 0u, 255u);
-        put_pixel(pixbuf, CHART_WIDTH - 1 - abs(j), i - 100, 0u, 0u, 0u, 255u);
-        put_pixel(pixbuf, CHART_WIDTH - 2 - abs(j), i - 100, 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, CHART_WIDTH - abs(j), i, 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, CHART_WIDTH - 1 - abs(j), i, 0u, 0u, 0u, 255u);
+        put_pixel(pixbuf, CHART_WIDTH - 2 - abs(j), i, 0u, 0u, 0u, 255u);
     }
 }
 
