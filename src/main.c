@@ -35,7 +35,7 @@ static void activate (GtkApplication* app, gpointer data)
     draw_put_lines_to_chart (wdata.chartData);
 
     GtkBuilder* builder = gtk_builder_new ();
-    gtk_builder_add_from_file (builder, "schema/interface.ui", NULL);
+    gtk_builder_add_from_file (builder, "schema/interface.xml", NULL);
 
     g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
 

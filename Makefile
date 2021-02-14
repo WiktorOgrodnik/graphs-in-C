@@ -1,18 +1,17 @@
 CC = gcc
 SRC_DIR = ./src
 INC_DIR = .
-OBJ_DIR = .
-CFLAGS = -std=c11 -Wall -Wextra -Wno-unused-parameter
+CFLAGS = -std=c11 -Wall -Wextra -Werror -Wno-unused-parameter
 GTK = `pkg-config --cflags gtk4` -lm
 LIBS = `pkg-config --libs gtk4` -lm
 NAME = wykresy
 
-OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/eval.o $(OBJ_DIR)/draw.o $(OBJ_DIR)/types.o
+OBJS = main.o eval.o draw.o types.o
 
 all: $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBS)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+%.o: $(SRC_DIR)/%.c
 	@$(CC) $(CFLAGS) -c -I$(INC_DIR) $< -o $@ $(GTK)
 
 clean:
