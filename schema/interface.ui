@@ -18,10 +18,9 @@
     <property name="title">Wykresy</property>
     <property name="default-width">770</property>
     <property name="default-height">900</property>
-    <property name="hide-on-close">True</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header">
-      <property name="decoration-layout">menu:minimize,maximize,close</property>
+      <property name="decoration-layout">icon:minimize,maximize,close</property>
         <child type="end">
           <object class="GtkMenuButton" id="gears">
             <property name="direction">none</property>
@@ -118,7 +117,7 @@
           </child>
           <child>
             <object id="checkbox1" class="GtkCheckButton">
-            <property name="active">TRUE</property>
+            <property name="active">True</property>
               <layout>
                 <property name="column">7</property>
                 <property name="row">2</property>
