@@ -3,11 +3,11 @@
 /*** Local functions declarations ***/
 static void activate (GtkApplication* app, gpointer data);
 static void calculate (GtkWindow* window);
-static void quit (GSimpleAction *action, GVariant *parameter, gpointer user_data);
-static void about (GSimpleAction *action, GVariant *parameter, gpointer user_data);
+static void quit (GSimpleAction* action, GVariant* parameter, gpointer user_data);
+static void about (GSimpleAction* action, GVariant* parameter, gpointer user_data);
 static void checkbox_rasterization_toggle (GtkWidget* widget, gpointer data);
 static void checkbox_experimental_toggle (GtkWidget* widget, gpointer data);
-static void changeTheme (GSimpleAction *action, GVariant *parameter, gpointer user_data);
+static void changeTheme (GSimpleAction* action, GVariant* parameter, gpointer user_data);
 
 static GActionEntry app_entries[] =
 {
@@ -148,7 +148,7 @@ static void calculate (GtkWindow* window)
     }
 }
 
-static void quit (GSimpleAction *action, GVariant *parameter, gpointer user_data)
+static void quit (GSimpleAction* action, GVariant* parameter, gpointer user_data)
 {
     /**
      * @brief Exit program
@@ -159,7 +159,7 @@ static void quit (GSimpleAction *action, GVariant *parameter, gpointer user_data
     g_application_quit (G_APPLICATION (app));
 }
 
-static void about (GSimpleAction *action, GVariant *parameter, gpointer user_data)
+static void about (GSimpleAction* action, GVariant* parameter, gpointer user_data)
 {
     /**
      * @brief print about dialog
@@ -206,7 +206,7 @@ static void checkbox_experimental_toggle (GtkWidget* widget, gpointer data)
         wdata.microSampling = false;
 }
 
-static void changeTheme (GSimpleAction *action, GVariant *parameter, gpointer user_data)
+static void changeTheme (GSimpleAction* action, GVariant* parameter, gpointer user_data)
 {
     /**
      * @brief change theme between darkmode and light mode
@@ -223,14 +223,14 @@ static void changeTheme (GSimpleAction *action, GVariant *parameter, gpointer us
         g_object_set (gtk_settings_get_default (), "gtk-theme-name", "Adwaita", "gtk-application-prefer-dark-theme", FALSE, NULL);       
         g_simple_action_set_state (action, g_variant_new_boolean (FALSE));
         wdata.darkmode = false;
-        calculate(GTK_WINDOW(window));
+        calculate (GTK_WINDOW(window));
     }
     else
     {
         g_object_set (gtk_settings_get_default (), "gtk-theme-name", "Adwaita", "gtk-application-prefer-dark-theme", TRUE, NULL); 
         g_simple_action_set_state (action, g_variant_new_boolean (TRUE));
         wdata.darkmode = true;
-        calculate(GTK_WINDOW(window));
+        calculate (GTK_WINDOW(window));
     }
 }
 
