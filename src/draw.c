@@ -7,6 +7,12 @@ static double char_to_double (const char str[]);
 
 void draw_chart (eqData* data, char* error_message) 
 {
+    /**
+     * @brief Draw chart on screen
+     * 
+     * @return void
+     */
+
     const gchar *equation, *interval, *scale_;
     gdouble l, p, delta, scale;
     
@@ -95,6 +101,7 @@ void draw_chart (eqData* data, char* error_message)
 
             if (!isnan(results[k][i]) && results[k][i] >=0 && results[k][i] <= CHART_HEIGHT) 
             {
+                // Diffrent line for each color
                 if (k == 0) put_pixel (data->chartData, i, results[k][i], 0u, 0u, 255u, 255u);
                 else if (k == 1) put_pixel (data->chartData, i, results[k][i], 255u, 0u, 0u, 255u);
                 else if (k == 2) put_pixel (data->chartData, i, results[k][i], 0u, 255u, 0u, 255u);
@@ -102,7 +109,7 @@ void draw_chart (eqData* data, char* error_message)
             }
 
             if (i && !isnan(results[k][i]) && data->rasterization)
-                draw_rasterizaton (data, results[k], i, lorg, delta, k);
+                draw_rasterizaton (data, results[k], i, l, delta, k);
         }
     }
     
@@ -112,13 +119,19 @@ void draw_chart (eqData* data, char* error_message)
 
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha)
 {
+    /**
+     * @brief Put pixel on pixbuf
+     * 
+     * @return void
+     */
+
     int width, height, rowstride, n_channels;
     guchar *pixels, *p; 
 
     n_channels = gdk_pixbuf_get_n_channels (pixbuf);
 
-    g_assert (gdk_pixbuf_get_colorspace(pixbuf) == GDK_COLORSPACE_RGB);
-    g_assert (gdk_pixbuf_get_bits_per_sample(pixbuf) == 8);
+    g_assert (gdk_pixbuf_get_colorspace (pixbuf) == GDK_COLORSPACE_RGB);
+    g_assert (gdk_pixbuf_get_bits_per_sample (pixbuf) == 8);
     g_assert (gdk_pixbuf_get_has_alpha (pixbuf));
     g_assert (n_channels == 4);
 
@@ -129,7 +142,7 @@ static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green
     if (y < 0 || y >= height) return;
 
     rowstride = gdk_pixbuf_get_rowstride (pixbuf);
-    pixels = gdk_pixbuf_get_pixels(pixbuf);
+    pixels = gdk_pixbuf_get_pixels (pixbuf);
 
     p = pixels + y * rowstride + x * n_channels;
     p[0] = red;
@@ -140,6 +153,12 @@ static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green
 
 static void draw_rasterizaton (eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color)
 {
+    /**
+     * @brief Rasterization and micro sampling
+     * 
+     * @return vodi
+     */
+
     gint start = wyniki[column - 1] < wyniki[column] ? (gint)wyniki[column - 1] : (gint)wyniki[column];
     gint end = wyniki[column - 1] < wyniki[column] ? (gint)wyniki[column] : (gint)wyniki[column - 1];
 
@@ -181,6 +200,12 @@ static void draw_rasterizaton (eqData* data, gdouble wyniki[], gint column, gdou
 //Draw lines on chart
 void draw_put_lines_to_chart (GdkPixbuf* pixbuf)
 {
+    /**
+     * @brief Draw graph grid on screen
+     * 
+     * @return void
+     */
+
     for (gint i = 0; i < CHART_WIDTH; i++)
     {
         for (gint j = 0; j < CHART_HEIGHT; j++)
@@ -199,6 +224,7 @@ void draw_put_lines_to_chart (GdkPixbuf* pixbuf)
         }
     }
 
+    //OX and OY axes
     for (gint i = 0; i < CHART_WIDTH; i++)
     {
         put_pixel (pixbuf, i, (CHART_HEIGHT / 2) - 1, 0u, 0u, 0u, 255u);
@@ -211,6 +237,7 @@ void draw_put_lines_to_chart (GdkPixbuf* pixbuf)
         put_pixel (pixbuf, (CHART_WIDTH / 2), i, 0u, 0u, 0u, 255u);
     }
 
+    //Arrowheads
     for(gint i = CHART_WIDTH / 2 - 15, j = 15; j >= -15; i++, j--)
     {
         put_pixel (pixbuf, i, abs (j), 0u, 0u, 0u, 255u);
@@ -225,6 +252,12 @@ void draw_put_lines_to_chart (GdkPixbuf* pixbuf)
 
 void draw_make_legend (GtkWidget* chartLeft[], gdouble delta)
 {
+    /**
+     * @brief Set specyfic text to legend labels
+     * 
+     * @return void
+     */
+
     for (gint i = 1; i <= 11; i++)
     {
         gchar str[20];

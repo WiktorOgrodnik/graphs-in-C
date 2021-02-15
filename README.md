@@ -2,7 +2,7 @@
 
 ## Opis programu
 
-![Screen programu](./docs/img2.png)
+![Screen programu](./docs/img3.png)
 
 Program wykresy służy do rysowania wykresów jednej zmiennej w zadanym przedziale. Wykres rysuje się w górnej części programu po naciśnięciu przycisku wprowadź. Program posiada zaawansowany interpreter obsługujący operatory matematyczne, funkcje takie jak sinus czy logarytm, kolejność wykonywania działań, dowolną ilość nawiasów oraz stałe matematyczne. Moduł wyświetlający wykres na ekranie ma zaimplementowany system prostej rasteryzacji, dzięki czemu nawet wykresy skomplikowanych funkcji prezentują się w przystępny sposób. Wspierane systemy operacyjne to Windows 10 i Linux.
 
@@ -11,7 +11,7 @@ Program wykresy służy do rysowania wykresów jednej zmiennej w zadanym przedzi
 Technologie użyte do stworzenia programu to:
 
 1. Język C11 (GCC 10.2),
-2. Biblioteka GTK 4.03,
+2. Biblioteka GTK 4.0,
 3. Program make,
 4. Visual Studio Code.
 
@@ -20,7 +20,7 @@ Technologie użyte do stworzenia programu to:
 ### Windows
 
 1. pobrać i zainstalować [MSYS2](https://www.msys2.org/), zgodnie z zaleceniami ze strony
-2. pobrać i zainstalować bibliotekę [GTK](https://www.gtk.org/docs/installations/windows/) (GTK+ 3.24) zgodnie z instruckją na stronie
+2. pobrać i zainstalować bibliotekę [GTK](https://www.gtk.org/docs/installations/windows/) (GTK 4.0) zgodnie z instruckją na stronie
 3. jeżeli nie są zainstalowne, przez menedżer pakietów MSYS2 pobrać kompilator mingw i program make;
 4. poprzez konsolę MSYS2 MinGW 64-bit (lub 32-bit) odnaleźć folder z kodem źródłowym i wpisać polecenie 'make';
 5. uruchomić program poleceniem ./wykresy.exe.
@@ -155,15 +155,14 @@ W programie znajdują się następujące moduły
 
 - Intepreter poleceń matematycznych w plikach eval.h i eval.c,
 - Moduł wyświetlający wykres w plikach draw.h i draw.c,
-- Moduł rysujący interfejs w plikach ui.h i ui.c,
-- Moduł zawierający konwertery pomiędzy typami w C w plikach convert.h i convert.c,
+- Moduł rysujący interfejs w plikach main.h i main.c,
 - Używane struktury zdefiniowane są w pliku types.h.
 
 Wyjaśnienie działania poszczególnych funkcji jest wyjaśnione w komentarzach wewnątrz programu.
 
 ## Dalszy rozwój
 
-Po zakończeniu projektu planuję dalsze prace nad programem. Oprócz rozwoju samego kodu, gdzie planuję migrację do GTK 4 oraz wykorzystywanie XML i CSS przy rysowaniu interfejsu, zaplanowane są również następujące funkcjonalności:
+Po zakończeniu projektu planuję dalsze prace nad programem. Oprócz rozwoju samego kodu, gdzie planuję wykorzystywanie CSS przy rysowaniu interfejsu, zaplanowane są również następujące funkcjonalności:
 
 - Wsparcie dla funkcji o kilku arguemntach, np. logarytm dowolnej podstawy;
 - Rysowanie wykresu pochodnej;
@@ -172,7 +171,8 @@ Po zakończeniu projektu planuję dalsze prace nad programem. Oprócz rozwoju sa
 - Parametry uruchamiania programu z konsoli;
 - Menu ustawień i "Co nowego";
 - Konfiguracja własnych stałych matematycznych;
-- Moduł automatycznych aktualizacji.
+- Moduł automatycznych aktualizacji;
+- Ciemny motyw.
 
 ## Licencjonowanie
 

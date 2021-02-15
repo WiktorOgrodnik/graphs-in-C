@@ -1,5 +1,6 @@
 #include "main.h"
 
+/*** Local functions declarations ***/
 static void activate (GtkApplication* app, gpointer data);
 static void calculate (GtkWindow* window);
 static void quit (GSimpleAction *action, GVariant *parameter, gpointer user_data);
@@ -20,9 +21,11 @@ int main (int argc, char* argv[])
     g_chdir(GTK_SRCDIR);
 #endif
 
+    // Create application
     app = gtk_application_new ("wiktor.ogrodnik.uwr.wykresy", G_APPLICATION_FLAGS_NONE);
     g_signal_connect (app, "activate", G_CALLBACK(activate), NULL);
 
+    // Run application
     int status = g_application_run (G_APPLICATION(app), argc, argv);
 
     g_object_unref (app);
@@ -31,26 +34,39 @@ int main (int argc, char* argv[])
 
 static void activate (GtkApplication* app, gpointer data)
 {
+    /**
+     * @brief Initialize user interface and read app structure from .xml files
+     * 
+     * @return void
+     */
+
+    // Initalize pixbuf (graph bitmap) 
     wdata.chartData = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8, CHART_WIDTH, CHART_HEIGHT);
     draw_put_lines_to_chart (wdata.chartData);
 
+    // Load interface form xml files
     GtkBuilder* builder = gtk_builder_new ();
     gtk_builder_add_from_file (builder, "schema/interface.xml", NULL);
 
+    // Configure menu entries
     g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
 
+    // Set main window
     GObject* window = gtk_builder_get_object (builder, "window");
     gtk_window_set_application (GTK_WINDOW(window), app);
 
+    // Configure main menu button
     GObject* gears = gtk_builder_get_object (builder, "gears");
     GMenuModel* menu = G_MENU_MODEL (gtk_builder_get_object (builder, "menu"));
     gtk_menu_button_set_menu_model (GTK_MENU_BUTTON (gears), menu);
 
+    // Initialize bitmap container
     GObject* chart = gtk_builder_get_object (builder, "chart");
     gtk_image_set_from_pixbuf (GTK_IMAGE(chart), wdata.chartData);
     gtk_image_set_pixel_size (GTK_IMAGE(chart), CHART_WIDTH);
     wdata.chart = GTK_WIDGET(chart);
 
+    // Initialzie legend labels
     GObject* bottomLegend = gtk_builder_get_object (builder, "gridLB");
     GObject* leftLegend = gtk_builder_get_object (builder, "gridLL");
 
@@ -68,6 +84,7 @@ static void activate (GtkApplication* app, gpointer data)
     draw_make_legend (wdata.chartLegendBottom, 2.0);
     draw_make_legend (wdata.chartLegendLeft, 2.0);
 
+    // Initialize props entry boxes
     wdata.intervalBuffer = gtk_entry_buffer_new ("10.0", 4);
     wdata.scaleBuffer = gtk_entry_buffer_new ("30.0", 4);
 
@@ -77,6 +94,7 @@ static void activate (GtkApplication* app, gpointer data)
     GObject* scaleEntry = gtk_builder_get_object (builder, "entry2");
     gtk_entry_set_buffer (GTK_ENTRY(scaleEntry), wdata.scaleBuffer);
 
+    // Initialize equations entry boxes
     for(gint i = 0; i < 4; i++)
     {
         wdata.equationBuffer[i] = gtk_entry_buffer_new ("", 0);
@@ -87,11 +105,13 @@ static void activate (GtkApplication* app, gpointer data)
         gtk_entry_set_buffer (GTK_ENTRY(entry), wdata.equationBuffer[i]);
     }
 
+    // Initialize button
     GObject* button = gtk_builder_get_object (builder, "buttonRun");
     g_signal_connect_swapped (button, "clicked", G_CALLBACK (calculate), window);
 
     wdata.rasterization = true;
 
+    // Initialize checkboxes
     GObject* checkBox = gtk_builder_get_object (builder, "checkbox1");
     g_signal_connect (checkBox, "toggled", G_CALLBACK(checkbox_rasterization_toggle), &wdata);
 
@@ -105,6 +125,11 @@ static void activate (GtkApplication* app, gpointer data)
 
 static void calculate (GtkWindow* window)
 {
+    /**
+     * @brief Draws graph, signal function. Redirects to draw function and print error messages.
+     * 
+     * @return void
+     */
     char message [100]; message[0] = '\0';
     draw_chart (&wdata, message);
 
@@ -121,11 +146,23 @@ static void calculate (GtkWindow* window)
 
 static void quit (GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
+    /**
+     * @brief Exit program
+     * 
+     * @return void
+     */
+
     g_application_quit (G_APPLICATION (app));
 }
 
 static void about (GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
+    /**
+     * @brief print about dialog
+     * 
+     * @return void
+     */
+
     const char license[] = "MIT License\n\nCopyright (c) 2021 Wiktor Ogrodnik\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n";
 
     GtkWidget* about = gtk_about_dialog_new();
