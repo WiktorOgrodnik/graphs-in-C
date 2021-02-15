@@ -3,13 +3,17 @@
   <menu id="menu">
     <section>
       <item>
-        <attribute name="label" translatable="yes">_About</attribute>
+        <attribute name="label" translatable="yes">_Ciemny Motyw</attribute>
+        <attribute name="action">app.theme</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Wykresy - informacje</attribute>
         <attribute name="action">app.about</attribute>
       </item>
     </section>
     <section>
       <item>
-        <attribute name="label" translatable="yes">_Quit</attribute>
+        <attribute name="label" translatable="yes">_Zakończ</attribute>
         <attribute name="action">app.quit</attribute>
       </item>
     </section>

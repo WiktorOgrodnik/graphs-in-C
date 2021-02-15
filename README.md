@@ -171,8 +171,7 @@ Po zakończeniu projektu planuję dalsze prace nad programem. Oprócz rozwoju sa
 - Parametry uruchamiania programu z konsoli;
 - Menu ustawień i "Co nowego";
 - Konfiguracja własnych stałych matematycznych;
-- Moduł automatycznych aktualizacji;
-- Ciemny motyw.
+- Moduł automatycznych aktualizacji.
 
 ## Licencjonowanie
 

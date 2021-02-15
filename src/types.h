@@ -39,6 +39,7 @@ typedef struct eqData_
     //Settings
     bool rasterization;
     bool microSampling;
+    bool darkmode;
     
 } eqData;
 

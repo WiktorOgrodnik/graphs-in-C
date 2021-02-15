@@ -1,8 +1,8 @@
 #include "draw.h"
 
 /*** Local functions declarations ***/
-static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha);
-static void draw_rasterizaton (eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color);
+static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha, bool darkmode);
+static void draw_rasterizaton (eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color, bool darkmode);
 static double char_to_double (const char str[]);
 
 void draw_chart (eqData* data, char* error_message) 
@@ -43,7 +43,7 @@ void draw_chart (eqData* data, char* error_message)
     }
 
     data->chartData = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8, CHART_WIDTH, CHART_HEIGHT);
-    draw_put_lines_to_chart (data->chartData);
+    draw_put_lines_to_chart (data->chartData, data->darkmode);
 
     //The loop is run 4 times, once for each equation 
     for (gint i = 3; i >= 0; i--)
@@ -102,14 +102,14 @@ void draw_chart (eqData* data, char* error_message)
             if (!isnan(results[k][i]) && results[k][i] >=0 && results[k][i] <= CHART_HEIGHT) 
             {
                 // Diffrent line for each color
-                if (k == 0) put_pixel (data->chartData, i, results[k][i], 0u, 0u, 255u, 255u);
-                else if (k == 1) put_pixel (data->chartData, i, results[k][i], 255u, 0u, 0u, 255u);
-                else if (k == 2) put_pixel (data->chartData, i, results[k][i], 0u, 255u, 0u, 255u);
-                else put_pixel (data->chartData, i, results[k][i], 125u, 27u, 186u, 255u);
+                if (k == 0) put_pixel (data->chartData, i, results[k][i], 0u, 0u, 255u, 255u, data->darkmode);
+                else if (k == 1) put_pixel (data->chartData, i, results[k][i], 255u, 0u, 0u, 255u, data->darkmode);
+                else if (k == 2) put_pixel (data->chartData, i, results[k][i], 0u, 255u, 0u, 255u, data->darkmode);
+                else put_pixel (data->chartData, i, results[k][i], 125u, 27u, 186u, 255u, data->darkmode);
             }
 
             if (i && !isnan(results[k][i]) && data->rasterization)
-                draw_rasterizaton (data, results[k], i, l, delta, k);
+                draw_rasterizaton (data, results[k], i, l, delta, k, data->darkmode);
         }
     }
     
@@ -117,7 +117,7 @@ void draw_chart (eqData* data, char* error_message)
     g_object_unref (data->chartData);
 }
 
-static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha)
+static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha, bool darkmode)
 {
     /**
      * @brief Put pixel on pixbuf
@@ -145,13 +145,21 @@ static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green
     pixels = gdk_pixbuf_get_pixels (pixbuf);
 
     p = pixels + y * rowstride + x * n_channels;
+
+    if (darkmode)
+    {
+        red = 255 - red;
+        green = 255 - green;
+        blue = 255 - blue;
+    }
+
     p[0] = red;
     p[1] = green;
     p[2] = blue;
     p[3] = alpha;
 }
 
-static void draw_rasterizaton (eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color)
+static void draw_rasterizaton (eqData* data, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color, bool darkmode)
 {
     /**
      * @brief Rasterization and micro sampling
@@ -189,16 +197,16 @@ static void draw_rasterizaton (eqData* data, gdouble wyniki[], gint column, gdou
     {
         for (gint i = start; i < end; i++)
         {
-            if (color == 0) put_pixel (data->chartData, column, i, 0u, 0u, 255u, 255u);
-            else if (color == 1) put_pixel (data->chartData, column, i, 255u, 0u, 0u, 255u);
-            else if (color == 2) put_pixel (data->chartData, column, i, 0u, 255u, 0u, 255u);
-            else put_pixel (data->chartData, column, i, 125u, 27u, 186u, 255u);
+            if (color == 0) put_pixel (data->chartData, column, i, 0u, 0u, 255u, 255u, darkmode);
+            else if (color == 1) put_pixel (data->chartData, column, i, 255u, 0u, 0u, 255u, darkmode);
+            else if (color == 2) put_pixel (data->chartData, column, i, 0u, 255u, 0u, 255u, darkmode);
+            else put_pixel (data->chartData, column, i, 125u, 27u, 186u, 255u, darkmode);
         }
     }
 }
 
 //Draw lines on chart
-void draw_put_lines_to_chart (GdkPixbuf* pixbuf)
+void draw_put_lines_to_chart (GdkPixbuf* pixbuf, bool darkmode)
 {
     /**
      * @brief Draw graph grid on screen
@@ -210,8 +218,8 @@ void draw_put_lines_to_chart (GdkPixbuf* pixbuf)
     {
         for (gint j = 0; j < CHART_HEIGHT; j++)
         {
-            if (j % (CHART_HEIGHT / 10) == 0 && j) put_pixel (pixbuf, i, j, 0u, 0u, 0u, 127u);
-            else if (j % (CHART_HEIGHT / 50) == 0 && j) put_pixel (pixbuf, i, j, 0u, 0u, 0u, 63u);
+            if (j % (CHART_HEIGHT / 10) == 0 && j) put_pixel (pixbuf, i, j, 0u, 0u, 0u, 127u, darkmode);
+            else if (j % (CHART_HEIGHT / 50) == 0 && j) put_pixel (pixbuf, i, j, 0u, 0u, 0u, 63u, darkmode);
         }
     }
 
@@ -219,34 +227,34 @@ void draw_put_lines_to_chart (GdkPixbuf* pixbuf)
     {
         for (gint j = 0; j < CHART_WIDTH; j++)
         {
-            if (j % (CHART_WIDTH / 10) == 0 && j) put_pixel(pixbuf, j, i, 0u, 0u, 0u, 127u);
-            else if (j % (CHART_WIDTH / 50) == 0 && j) put_pixel(pixbuf, j, i, 0u, 0u, 0u, 63u);
+            if (j % (CHART_WIDTH / 10) == 0 && j) put_pixel(pixbuf, j, i, 0u, 0u, 0u, 127u, darkmode);
+            else if (j % (CHART_WIDTH / 50) == 0 && j) put_pixel(pixbuf, j, i, 0u, 0u, 0u, 63u, darkmode);
         }
     }
 
     //OX and OY axes
     for (gint i = 0; i < CHART_WIDTH; i++)
     {
-        put_pixel (pixbuf, i, (CHART_HEIGHT / 2) - 1, 0u, 0u, 0u, 255u);
-        put_pixel (pixbuf, i, (CHART_HEIGHT / 2), 0u, 0u, 0u, 255u);
+        put_pixel (pixbuf, i, (CHART_HEIGHT / 2) - 1, 0u, 0u, 0u, 255u, darkmode);
+        put_pixel (pixbuf, i, (CHART_HEIGHT / 2), 0u, 0u, 0u, 255u, darkmode);
     }
 
     for (gint i = 0; i < CHART_HEIGHT; i++)
     {
-        put_pixel (pixbuf, (CHART_WIDTH / 2) - 1, i, 0u, 0u, 0u, 255u);
-        put_pixel (pixbuf, (CHART_WIDTH / 2), i, 0u, 0u, 0u, 255u);
+        put_pixel (pixbuf, (CHART_WIDTH / 2) - 1, i, 0u, 0u, 0u, 255u, darkmode);
+        put_pixel (pixbuf, (CHART_WIDTH / 2), i, 0u, 0u, 0u, 255u, darkmode);
     }
 
     //Arrowheads
     for(gint i = CHART_WIDTH / 2 - 15, j = 15; j >= -15; i++, j--)
     {
-        put_pixel (pixbuf, i, abs (j), 0u, 0u, 0u, 255u);
-        put_pixel (pixbuf, i, abs (j) - 1, 0u, 0u, 0u, 255u);
-        put_pixel (pixbuf, i, abs (j) - 2, 0u, 0u, 0u, 255u);
+        put_pixel (pixbuf, i, abs (j), 0u, 0u, 0u, 255u, darkmode);
+        put_pixel (pixbuf, i, abs (j) - 1, 0u, 0u, 0u, 255u, darkmode);
+        put_pixel (pixbuf, i, abs (j) - 2, 0u, 0u, 0u, 255u, darkmode);
 
-        put_pixel (pixbuf, CHART_WIDTH - abs (j), i, 0u, 0u, 0u, 255u);
-        put_pixel (pixbuf, CHART_WIDTH - 1 - abs (j), i, 0u, 0u, 0u, 255u);
-        put_pixel (pixbuf, CHART_WIDTH - 2 - abs (j), i, 0u, 0u, 0u, 255u);
+        put_pixel (pixbuf, CHART_WIDTH - abs (j), i, 0u, 0u, 0u, 255u, darkmode);
+        put_pixel (pixbuf, CHART_WIDTH - 1 - abs (j), i, 0u, 0u, 0u, 255u, darkmode);
+        put_pixel (pixbuf, CHART_WIDTH - 2 - abs (j), i, 0u, 0u, 0u, 255u, darkmode);
     }
 }
 

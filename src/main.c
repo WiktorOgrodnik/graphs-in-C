@@ -7,12 +7,15 @@ static void quit (GSimpleAction *action, GVariant *parameter, gpointer user_data
 static void about (GSimpleAction *action, GVariant *parameter, gpointer user_data);
 static void checkbox_rasterization_toggle (GtkWidget* widget, gpointer data);
 static void checkbox_experimental_toggle (GtkWidget* widget, gpointer data);
+static void changeTheme (GSimpleAction *action, GVariant *parameter, gpointer user_data);
 
 static GActionEntry app_entries[] =
 {
   { "about", about, NULL, NULL, NULL, {0, 0, 0}},
-  { "quit", quit, NULL, NULL, NULL, {0, 0, 0}}
+  { "quit", quit, NULL, NULL, NULL, {0, 0, 0}},
+  { "theme", NULL, NULL, "false", changeTheme, {0, 0, 0}}
 };
+
 
 int main (int argc, char* argv[])
 {
@@ -42,7 +45,7 @@ static void activate (GtkApplication* app, gpointer data)
 
     // Initalize pixbuf (graph bitmap) 
     wdata.chartData = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8, CHART_WIDTH, CHART_HEIGHT);
-    draw_put_lines_to_chart (wdata.chartData);
+    draw_put_lines_to_chart (wdata.chartData, wdata.darkmode);
 
     // Load interface form xml files
     GtkBuilder* builder = gtk_builder_new ();
@@ -52,7 +55,7 @@ static void activate (GtkApplication* app, gpointer data)
     g_action_map_add_action_entries (G_ACTION_MAP (app), app_entries, G_N_ELEMENTS (app_entries), app);
 
     // Set main window
-    GObject* window = gtk_builder_get_object (builder, "window");
+    window = gtk_builder_get_object (builder, "window");
     gtk_window_set_application (GTK_WINDOW(window), app);
 
     // Configure main menu button
@@ -110,6 +113,7 @@ static void activate (GtkApplication* app, gpointer data)
     g_signal_connect_swapped (button, "clicked", G_CALLBACK (calculate), window);
 
     wdata.rasterization = true;
+    wdata.darkmode = false;
 
     // Initialize checkboxes
     GObject* checkBox = gtk_builder_get_object (builder, "checkbox1");
@@ -200,5 +204,33 @@ static void checkbox_experimental_toggle (GtkWidget* widget, gpointer data)
         wdata.microSampling = true;
     else
         wdata.microSampling = false;
+}
+
+static void changeTheme (GSimpleAction *action, GVariant *parameter, gpointer user_data)
+{
+    /**
+     * @brief change theme between darkmode and light mode
+     * 
+     * @return void
+     */
+
+    GVariant* action_state;
+    action_state = g_action_get_state (G_ACTION(action));
+    const gboolean flag = g_variant_get_boolean (action_state);
+
+    if (flag)
+    {
+        g_object_set (gtk_settings_get_default (), "gtk-theme-name", "Adwaita", "gtk-application-prefer-dark-theme", FALSE, NULL);       
+        g_simple_action_set_state (action, g_variant_new_boolean (FALSE));
+        wdata.darkmode = false;
+        calculate(GTK_WINDOW(window));
+    }
+    else
+    {
+        g_object_set (gtk_settings_get_default (), "gtk-theme-name", "Adwaita", "gtk-application-prefer-dark-theme", TRUE, NULL); 
+        g_simple_action_set_state (action, g_variant_new_boolean (TRUE));
+        wdata.darkmode = true;
+        calculate(GTK_WINDOW(window));
+    }
 }
 

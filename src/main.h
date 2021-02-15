@@ -5,6 +5,7 @@
 #include "draw.h"
 
 GtkApplication* app;
+GObject* window;
 eqData wdata;
 
 #endif
