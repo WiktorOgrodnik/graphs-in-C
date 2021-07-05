@@ -23,18 +23,17 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib/gstdio.h>
 
-typedef struct eqData_
-{
+typedef struct eqData_ {
     //Application elements
-    GtkWidget* chartLegendLeft[11];
-    GtkWidget* chartLegendBottom[11];
+    GtkWidget* chartLegendLeft [11];
+    GtkWidget* chartLegendBottom [11];
 
     GdkPixbuf* chartData;
     GtkWidget* chart;
 
     GtkEntryBuffer* intervalBuffer;
     GtkEntryBuffer* scaleBuffer;
-    GtkEntryBuffer* equationBuffer[4];
+    GtkEntryBuffer* equationBuffer [4];
 
     //Settings
     bool rasterization;

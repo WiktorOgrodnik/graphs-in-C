@@ -132,7 +132,7 @@
           </child>
           <child>
             <object id="label4" class="GtkLabel">
-              <property name="label">Mikropróbkowanie (eksperymentalne): </property>
+              <property name="label">Mikropróbkowanie: </property>
               <layout>
                 <property name="column">8</property>
                 <property name="row">2</property>

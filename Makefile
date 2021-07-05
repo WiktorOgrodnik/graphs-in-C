@@ -6,7 +6,7 @@ GTK = `pkg-config --cflags gtk4` -lm
 LIBS = `pkg-config --libs gtk4` -lm
 NAME = wykresy
 
-OBJS = main.o eval.o draw.o types.o
+OBJS = main.o parse.o eval.o draw.o types.o
 
 all: $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBS)
