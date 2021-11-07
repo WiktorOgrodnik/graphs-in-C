@@ -88,7 +88,7 @@ void draw_chart (eqData* data, char* error_message) {
 
         for (gint j = 0; j < CHART_WIDTH; j++) {
             
-            double result = eval (expressions[i], l, &error, message); //calculate the equation by substituting for x point l
+            double result = 0;
 
             if (data->derivative[i]) {
                 result = ((eval (expressions[i], l + CONST_H, &error, message) - eval (expressions[i], l - CONST_H, &error, message)) / (2 * CONST_H));
