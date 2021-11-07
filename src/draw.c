@@ -1,5 +1,7 @@
 #include "draw.h"
 
+#define CONST_H pow(2, -20)
+
 /*** Local functions declarations ***/
 static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green, guchar blue, guchar alpha, bool darkmode);
 static void draw_rasterizaton (eqData* data, Expr* expression, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color, bool darkmode);
@@ -45,14 +47,14 @@ void draw_chart (eqData* data, char* error_message) {
     data->chartData = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8, CHART_WIDTH, CHART_HEIGHT);
     draw_put_lines_to_chart (data->chartData, data->darkmode);
 
-    //The loop is run 4 times, once for each equation 
+    //The loop is run 4 times, once for each parse 
     for (gint i = 3; i >= 0; i--) {
         equation = gtk_entry_buffer_get_text (data->equationBuffer[i]);
 
         int error = 0;
         char message [100];
         error_message [0] = message [0] = '\0';
-
+        
         expressions [i] = parse (equation, &error, message);
 
         if (!strlen (equation) || expressions [i] == NULL) continue;
@@ -87,6 +89,12 @@ void draw_chart (eqData* data, char* error_message) {
         for (gint j = 0; j < CHART_WIDTH; j++) {
             
             double result = eval (expressions[i], l, &error, message); //calculate the equation by substituting for x point l
+
+            if (data->derivative[i]) {
+                result = ((eval (expressions[i], l + CONST_H, &error, message) - eval (expressions[i], l - CONST_H, &error, message)) / (2 * CONST_H));
+            } else {
+                result = eval (expressions[i], l, &error, message); //calculate the equation by substituting for x point l
+            }
 
             results [i][j] = result;
             l += delta;

@@ -167,6 +167,23 @@
             </object>
           </child>
           <child>
+            <object id="labelEquationDerivative0" class="GtkLabel">
+              <property name="label">Pochodna: </property>
+              <layout>
+                <property name="column">9</property>
+                <property name="row">3</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entryEquationDerivative0" class="GtkCheckButton">
+            <layout>
+                <property name="column">10</property>
+                <property name="row">3</property>
+            </layout>
+            </object>
+          </child>
+          <child>
             <object id="labelEquation1" class="GtkLabel">
               <property name="label">f2(x) = </property>
               <layout>
@@ -183,6 +200,23 @@
                 <property name="row">4</property>
                 <property name="column-span">8</property>
               </layout>
+            </object>
+          </child>
+          <child>
+            <object id="labelEquationDerivative1" class="GtkLabel">
+              <property name="label">Pochodna: </property>
+              <layout>
+                <property name="column">9</property>
+                <property name="row">4</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entryEquationDerivative1" class="GtkCheckButton">
+            <layout>
+                <property name="column">10</property>
+                <property name="row">4</property>
+            </layout>
             </object>
           </child>
           <child>
@@ -205,6 +239,23 @@
             </object>
           </child>
           <child>
+            <object id="labelEquationDerivative2" class="GtkLabel">
+              <property name="label">Pochodna: </property>
+              <layout>
+                <property name="column">9</property>
+                <property name="row">5</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entryEquationDerivative2" class="GtkCheckButton">
+            <layout>
+                <property name="column">10</property>
+                <property name="row">5</property>
+            </layout>
+            </object>
+          </child>
+          <child>
             <object id="labelEquation3" class="GtkLabel">
               <property name="label">f4(x) = </property>
               <layout>
@@ -221,6 +272,23 @@
                 <property name="row">6</property>
                 <property name="column-span">8</property>
               </layout>
+            </object>
+          </child>
+          <child>
+            <object id="labelEquationDerivative3" class="GtkLabel">
+              <property name="label">Pochodna: </property>
+              <layout>
+                <property name="column">9</property>
+                <property name="row">6</property>
+              </layout>
+            </object>
+          </child>
+          <child>
+            <object id="entryEquationDerivative3" class="GtkCheckButton">
+            <layout>
+                <property name="column">10</property>
+                <property name="row">6</property>
+            </layout>
             </object>
           </child>
           <child>

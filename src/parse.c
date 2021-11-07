@@ -3,40 +3,48 @@
 
 /* Definitions */
 
-//Working on chars
+// Working on chars
 static void return_char (int c, char** inp);
 static int read_char (char** inp);
 
-//Return number or func(x) or constant
+// Returns number or func(x) or constant
 static Expr* read_value (char** inp, int* error, char* message);
 
-//Grammar not terminals
+// Grammar not terminals
 static Expr* expression (char** inp, int* error, char* message);
 static Expr* ingredient (char** inp, int* error, char* message);
 static Expr* factor (char** inp, int* error, char* message);
 static Expr* exponent (char** inp, int* error, char* message);
 
+// Generates runtime error message (not enough memory)
 static Expr* runtime_error (int* error, char* message);
 
+// Array of functions
 char* nameOfFunctions[NUMBER_OF_FUNCTIONS] = {"sin", "cos", "tan", "tg", "cot", "ctg", "log", "ln", "sqrt", "log10", "log2", "abs", "sinh", "cosh", "tanh", "tgh", "ceil", "floor", "acos", "arccos", "asin", "arcsin", "atan", "arctan", "arctg", "exp"};
 double (*functions[NUMBER_OF_FUNCTIONS])(double x) = {sin, cos, tan, tan, cot, cot, log, log, sqrt, log10, log2, fabs, sinh, cosh, tanh, tanh, ceil, floor, acos, acos, asin, asin, atan, atan, atan, exp};
 
+// Array of constants
 char* nameOfConstants[NUMBER_OF_CONSTANTS] = {"e", "pi", "phi"};
 double constants[NUMBER_OF_CONSTANTS] = {M_E, M_PI, 1.618033988749895};
 
-//Print parse
+// Prints parse auxilary functions
 static const char* fun_to_string (double (*fun)(double));
 static const char* binop_to_string (double (*fun)(double, double));
 
+/* Body */
+
+// Converts pointer to binary operator to binary name 
 static const char* fun_to_string (double (*fun)(double)) {
-    for (int i = 0; i < NUMBER_OF_FUNCTIONS; i++) {
+
+    for (int i = 0; i < NUMBER_OF_FUNCTIONS; i++)
         if (fun == functions[i]) return nameOfFunctions[i];
-    }
 
     return "null";
 }
 
+// Converts pointer to binary operator to binary name 
 static const char* binop_to_string (double (*fun)(double, double)) {
+
     if (fun == pow) return "pow";
     if (fun == add) return "add";
     if (fun == sub) return "sub";
@@ -46,9 +54,10 @@ static const char* binop_to_string (double (*fun)(double, double)) {
     return "null";
 }
 
+// Prints parsed expression (in lisp style)
 char* to_string (Expr* expression) {
 
-    char* napis = (char*) malloc (1000 * sizeof (char));
+    char* napis = (char*) malloc (10000 * sizeof (char));
 
     switch (expression->tag) {
         case CONST_EXPR: sprintf (napis, "(const-expr %f)", expression->val1.data);
@@ -67,12 +76,15 @@ char* to_string (Expr* expression) {
     return napis;
 }
 
+// Generates runtime error message (not enough memory)
 static Expr* runtime_error (int* error, char* message) {
 
     *error = 4;
     return NULL;
 }
 
+
+// Parses mathematical equation to Expression 
 Expr* parse (const char* eqBegin, int* error, char* message) {
 
     int eqLength = strlen (eqBegin);
@@ -93,6 +105,7 @@ Expr* parse (const char* eqBegin, int* error, char* message) {
         result = expression (&inptr, error, message);
     }
 
+    // If equation is empty, prints error (empty string)
     if (result == NULL) *error = 5;
     return result;
 }
@@ -126,6 +139,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
     bool isFunction = false;
     Expr* ex;
 
+    // Allocate node
     if ((ex = (Expr*) malloc (sizeof (Expr))) == NULL)
         return runtime_error (error, message);
 
@@ -147,6 +161,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
             }
         }
 
+        // Final number
         ex->val1.data = n / exp10;
     }
 
@@ -156,6 +171,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
             
             Expr *ex1, *ex2;
 
+            // If previously there was a number, create a multiplication node
             if ((ex1 = (Expr*) malloc (sizeof (Expr))) == NULL || (ex2 = (Expr*) malloc (sizeof (Expr))) == NULL)
                 return runtime_error (error, message);
 
@@ -171,7 +187,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
         }
         else ex->tag = VAR_EXPR;
 
-        c = *(*inp)++;
+        c = *(*inp)++; // For some reason it works :)
         c = *(*inp)++;
     }
 
@@ -202,6 +218,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
 
                     Expr *ex1, *ex2;
 
+                    // If previously there was a number, create a multiplication node
                     if ((ex1 = (Expr*) malloc (sizeof (Expr))) == NULL || (ex2 = (Expr*) malloc (sizeof (Expr))) == NULL)
                         return runtime_error (error, message);
 
@@ -234,16 +251,12 @@ static Expr* read_value (char** inp, int* error, char* message) {
                     found = true;
                     constant = true;
 
-                    if (isNum) {
-                        ex->tag = CONST_EXPR;
-                        ex->val1.data = (n / exp10) * constants [i];
-                    }
-                    else { 
-                        ex->tag = CONST_EXPR;
-                        ex->val1.data = constants [i];
-                    }
+                    ex->tag = CONST_EXPR;
 
-                    return_char (c, inp);
+                    if (isNum) ex->val1.data = (n / exp10) * constants [i]; // For optimization, create multiplication of constant and number in one node
+                    else ex->val1.data = constants [i];
+                
+                    //return_char (c, inp); // calculations with constants doesn't work with this line of code
                 }
             }
 
@@ -261,6 +274,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
             }
         }
 
+        // Skip function body
         if (isFunction) {
             while ((c = *(*inp)++) != ')');
         }
@@ -302,6 +316,7 @@ static Expr* expression (char** inp, int* error, char* message) { //Expression c
         Expr* ex1;
         Expr* ex2 = res;
 
+        // -x <=> (-1) * x
         if ((ex1 = (Expr*) malloc (sizeof (Expr))) == NULL || (res = (Expr*) malloc (sizeof (Expr))) == NULL)
             return runtime_error (error, message);
 
@@ -319,6 +334,7 @@ static Expr* expression (char** inp, int* error, char* message) { //Expression c
         Expr* ex1 = res;
         Expr* ex2 = ingredient (inp, error, message); //find next ingredient
 
+        // Create new binary operator node
         if ((res = (Expr*) malloc (sizeof (Expr))) == NULL)
             return runtime_error (error, message);
 
@@ -337,7 +353,7 @@ static Expr* expression (char** inp, int* error, char* message) { //Expression c
 static Expr* ingredient (char** inp, int* error, char* message) { //Expression consist of ingredients and signs '+' and '-'
 
     int c;
-    Expr *res;
+    Expr* res;
 
     res = factor (inp, error, message); //find next ingredient
 
@@ -348,6 +364,8 @@ static Expr* ingredient (char** inp, int* error, char* message) { //Expression c
         ex1 = res;
         ex2 = factor (inp, error, message); //find next ingredient
 
+
+        // Create new binary operator node
         if (((res = (Expr*) malloc (sizeof (Expr))) == NULL))
             return runtime_error (error, message);
 
@@ -366,7 +384,7 @@ static Expr* ingredient (char** inp, int* error, char* message) { //Expression c
 static Expr* factor (char** inp, int* error, char* message) { //factors consist of exponents and sign '^'
 
     int c;
-    Expr *res;
+    Expr* res;
 
     res = exponent (inp, error, message); //find next exponent
 
@@ -375,6 +393,7 @@ static Expr* factor (char** inp, int* error, char* message) { //factors consist 
         Expr* ex1 = res;
         Expr* ex2 = factor (inp, error, message); //find next factor (becouse the stange order of actions with ^ sign)
 
+        // Create new binary operator node
         if (((res = (Expr*) malloc (sizeof (Expr))) == NULL))
             return runtime_error (error, message);
 
@@ -394,9 +413,9 @@ static Expr* exponent (char** inp, int* error, char* message) { //exponent can b
     Expr* res;
 
     if ((res = (Expr*) malloc (sizeof (Expr))) == NULL)
-        return runtime_error (error, message);
+            return runtime_error (error, message);
 
-    if ((c = read_char (inp)) == NUMBER) return read_value (inp, error, message); //if the next character is number, function, constant or variable read value
+    if ((c = read_char (inp)) == NUMBER) return read_value (inp, error, message); // if the next character is number, function, constant or variable read value
     else if (c == '(') { // normal parenthesis, calculate the value in parentheses
         res = expression (inp, error, message);
 
@@ -479,7 +498,7 @@ static Expr* exponent (char** inp, int* error, char* message) { //exponent can b
         res->tag = ERROR_EXPR;
         res->val1.error = 2;
         res->val2.message = (char*) malloc (sizeof (char) * 5);
-        sprintf (res->val2.message, "%s", *inp);
+        sprintf (res->val2.message, *inp);
 
         return res;
     }
@@ -492,7 +511,7 @@ double fractionalPart (double a) {
 
 //Cotangens
 double cot (double a) {
-    if (tan (a) == 0) return nan ("out");
+    if (tan (a) == 0) return nan ("error");
     return 1 / tan (a);
 }
 

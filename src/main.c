@@ -5,6 +5,7 @@ static void activate (GtkApplication* app, gpointer data);
 static void calculate (GtkWindow* window);
 static void quit (GSimpleAction* action, GVariant* parameter, gpointer user_data);
 static void about (GSimpleAction* action, GVariant* parameter, gpointer user_data);
+static void checkbox_derivative_toggle (GtkWidget* widget, gpointer data);
 static void checkbox_rasterization_toggle (GtkWidget* widget, gpointer data);
 static void checkbox_experimental_toggle (GtkWidget* widget, gpointer data);
 static void changeTheme (GSimpleAction* action, GVariant* parameter, gpointer user_data);
@@ -92,14 +93,22 @@ static void activate (GtkApplication* app, gpointer data) {
     GObject* scaleEntry = gtk_builder_get_object (builder, "entry2");
     gtk_entry_set_buffer (GTK_ENTRY (scaleEntry), wdata.scaleBuffer);
 
+    gint num [] = {0, 1, 2, 3};
+
     // Initialize equations entry boxes
     for (gint i = 0; i < 4; i++) {
         wdata.equationBuffer[i] = gtk_entry_buffer_new ("", 0);
-        char equationName[16]; equationName[0] = '\0';
+        char equationName[26]; equationName[0] = '\0';
         sprintf (equationName, "entryEquation%d", i);
 
         GObject* entry = gtk_builder_get_object (builder, equationName);
         gtk_entry_set_buffer (GTK_ENTRY (entry), wdata.equationBuffer[i]);
+
+        wdata.derivative[i] = false;
+
+        sprintf (equationName, "entryEquationDerivative%d", i);
+        GObject* checkBoxDer = gtk_builder_get_object (builder, equationName);
+        g_signal_connect (checkBoxDer, "toggled", G_CALLBACK (checkbox_derivative_toggle), GINT_TO_POINTER (num [i]));
     }
 
     // Initialize button
@@ -161,7 +170,7 @@ static void about (GSimpleAction* action, GVariant* parameter, gpointer user_dat
 
     GtkWidget* about = gtk_about_dialog_new ();
     gtk_about_dialog_set_program_name (GTK_ABOUT_DIALOG(about), "Wykresy");
-    gtk_about_dialog_set_version (GTK_ABOUT_DIALOG(about), "0.2");
+    gtk_about_dialog_set_version (GTK_ABOUT_DIALOG(about), "0.21");
     gtk_about_dialog_set_copyright (GTK_ABOUT_DIALOG(about), "c Wiktor Ogrodnik 2021");
     gtk_about_dialog_set_license (GTK_ABOUT_DIALOG(about), license);
 
@@ -192,6 +201,22 @@ static void checkbox_experimental_toggle (GtkWidget* widget, gpointer data) {
         wdata.microSampling = true;
     else
         wdata.microSampling = false;
+}
+
+static void checkbox_derivative_toggle (GtkWidget* widget, gpointer data) {
+    
+    /**
+     * @brief
+     * 
+     * @return void
+     */
+
+    int s = GPOINTER_TO_INT (data);
+    
+    if(gtk_check_button_get_active (GTK_CHECK_BUTTON (widget)))
+        wdata.derivative [s] = true;
+    else
+        wdata.derivative [s] = false;
 }
 
 static void changeTheme (GSimpleAction* action, GVariant* parameter, gpointer user_data) {

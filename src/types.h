@@ -34,6 +34,7 @@ typedef struct eqData_ {
     GtkEntryBuffer* intervalBuffer;
     GtkEntryBuffer* scaleBuffer;
     GtkEntryBuffer* equationBuffer [4];
+    bool derivative [4];
 
     //Settings
     bool rasterization;
