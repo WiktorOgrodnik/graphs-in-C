@@ -1,7 +1,7 @@
 CC = gcc
 SRC_DIR = ./src
 INC_DIR = .
-CFLAGS = -std=gnu18 -Wall -Wextra -Werror -Wpedantic -Wno-unused-parameter
+CFLAGS = -std=gnu18 -Wall -Wextra -Wpedantic -Wno-unused-parameter
 GTK = `pkg-config --cflags gtk4` -lm
 LIBS = `pkg-config --libs gtk4` -lm
 NAME = wykresy

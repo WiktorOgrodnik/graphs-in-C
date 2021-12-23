@@ -3,17 +3,25 @@
   <menu id="menu">
     <section>
       <item>
-        <attribute name="label" translatable="yes">_Ciemny Motyw</attribute>
+        <attribute name="label" translatable="yes">_Open</attribute>
+        <attribute name="action">app.open</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Save</attribute>
+        <attribute name="action">app.save</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Dark Mode</attribute>
         <attribute name="action">app.theme</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">_Wykresy - informacje</attribute>
+        <attribute name="label" translatable="yes">_About Wykresy</attribute>
         <attribute name="action">app.about</attribute>
       </item>
     </section>
     <section>
       <item>
-        <attribute name="label" translatable="yes">_Zakończ</attribute>
+        <attribute name="label" translatable="yes">_Quit</attribute>
         <attribute name="action">app.quit</attribute>
       </item>
     </section>
@@ -76,7 +84,7 @@
           </child>
           <child>
             <object id="label1" class="GtkLabel">
-              <property name="label">Przedział: </property>
+              <property name="label">Interval: </property>
               <layout>
                 <property name="column">0</property>
                 <property name="row">2</property>
@@ -95,7 +103,7 @@
           </child>
           <child>
             <object id="label2" class="GtkLabel">
-              <property name="label">Skala: </property>
+              <property name="label">Scale: </property>
               <layout>
                 <property name="column">3</property>
                 <property name="row">2</property>
@@ -114,7 +122,7 @@
           </child>
           <child>
             <object id="label3" class="GtkLabel">
-              <property name="label">Rasteryzacja: </property>
+              <property name="label">Rasterization: </property>
               <layout>
                 <property name="column">6</property>
                 <property name="row">2</property>
@@ -132,7 +140,7 @@
           </child>
           <child>
             <object id="label4" class="GtkLabel">
-              <property name="label">Mikropróbkowanie: </property>
+              <property name="label">Micro sampling: </property>
               <layout>
                 <property name="column">8</property>
                 <property name="row">2</property>
@@ -168,7 +176,7 @@
           </child>
           <child>
             <object id="labelEquationDerivative0" class="GtkLabel">
-              <property name="label">Pochodna: </property>
+              <property name="label">Derivative: </property>
               <layout>
                 <property name="column">9</property>
                 <property name="row">3</property>
@@ -204,7 +212,7 @@
           </child>
           <child>
             <object id="labelEquationDerivative1" class="GtkLabel">
-              <property name="label">Pochodna: </property>
+              <property name="label">Derivative: </property>
               <layout>
                 <property name="column">9</property>
                 <property name="row">4</property>
@@ -240,7 +248,7 @@
           </child>
           <child>
             <object id="labelEquationDerivative2" class="GtkLabel">
-              <property name="label">Pochodna: </property>
+              <property name="label">Derivative: </property>
               <layout>
                 <property name="column">9</property>
                 <property name="row">5</property>
@@ -276,7 +284,7 @@
           </child>
           <child>
             <object id="labelEquationDerivative3" class="GtkLabel">
-              <property name="label">Pochodna: </property>
+              <property name="label">Derivative: </property>
               <layout>
                 <property name="column">9</property>
                 <property name="row">6</property>
@@ -293,7 +301,7 @@
           </child>
           <child>
             <object id="buttonRun" class="GtkButton">
-              <property name="label">Wprowadź</property>
+              <property name="label">Enter</property>
               <layout>
                 <property name="column">6</property>
                 <property name="row">7</property>

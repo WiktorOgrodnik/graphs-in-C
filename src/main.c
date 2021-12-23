@@ -3,14 +3,20 @@
 /*** Local functions declarations ***/
 static void activate (GtkApplication* app, gpointer data);
 static void calculate (GtkWindow* window);
+static void open_file (GSimpleAction* action, GVariant* parameter, gpointer user_data);
+static void save_file (GSimpleAction* action, GVariant* parameter, gpointer user_data);
 static void quit (GSimpleAction* action, GVariant* parameter, gpointer user_data);
 static void about (GSimpleAction* action, GVariant* parameter, gpointer user_data);
+static void load_from_file (GtkNativeDialog* native, gint response);
+static void save_to_file (GtkNativeDialog* native, gint response);
 static void checkbox_derivative_toggle (GtkWidget* widget, gpointer data);
 static void checkbox_rasterization_toggle (GtkWidget* widget, gpointer data);
 static void checkbox_experimental_toggle (GtkWidget* widget, gpointer data);
 static void changeTheme (GSimpleAction* action, GVariant* parameter, gpointer user_data);
 
 static GActionEntry app_entries[] = {
+  { "open", open_file, NULL, NULL, NULL, {0, 0, 0}},
+  { "save", save_file, NULL, NULL, NULL, {0, 0, 0}},
   { "about", about, NULL, NULL, NULL, {0, 0, 0}},
   { "quit", quit, NULL, NULL, NULL, {0, 0, 0}},
   { "theme", NULL, NULL, "false", changeTheme, {0, 0, 0}}
@@ -175,6 +181,95 @@ static void about (GSimpleAction* action, GVariant* parameter, gpointer user_dat
     gtk_about_dialog_set_license (GTK_ABOUT_DIALOG(about), license);
 
     gtk_widget_show (about);
+}
+
+static void open_file (GSimpleAction* action, GVariant* parameter, gpointer user_data) {
+    /**
+     * @brief open dialog
+     * 
+     * @return void
+     */
+
+    GtkFileChooserNative* fileChooser = gtk_file_chooser_native_new("Open file", NULL, GTK_FILE_CHOOSER_ACTION_OPEN, "Open", "Cancel");
+
+    g_signal_connect(fileChooser, "response", G_CALLBACK(load_from_file), NULL);
+    gtk_native_dialog_show(GTK_NATIVE_DIALOG(fileChooser));
+}
+
+static void save_file(GSimpleAction* action, GVariant* parameter, gpointer user_data) {
+
+    GtkFileChooserNative* fileChooser = gtk_file_chooser_native_new("Save file", NULL, GTK_FILE_CHOOSER_ACTION_SAVE, "Save", "Cancel");
+    GtkFileChooser* chooser = GTK_FILE_CHOOSER(fileChooser);
+
+    gtk_file_chooser_set_current_name(chooser, "new_data.txt");
+
+    g_signal_connect(fileChooser, "response", G_CALLBACK(save_to_file), NULL);
+    gtk_native_dialog_show(GTK_NATIVE_DIALOG(fileChooser));
+}
+
+
+static void load_from_file(GtkNativeDialog* native, gint response) {
+    if (response == GTK_RESPONSE_ACCEPT) {
+        GtkFileChooser* chooser = GTK_FILE_CHOOSER(native);
+        GFile* file = gtk_file_chooser_get_file(chooser);
+
+        gchar* napis;
+
+        if (g_file_load_contents(file, NULL, &napis, NULL, NULL, NULL)) {
+            for (gint i = 0; i < 4; i++) {
+                gchar* pos = strchr(napis, '\n');
+                if (pos) {
+                    *pos = '\0';
+                    gtk_entry_buffer_set_text(wdata.equationBuffer[i], napis, strlen(napis));
+                    strcpy(napis, pos + 1);
+                } else {
+                    gtk_entry_buffer_set_text(wdata.equationBuffer[i], napis, strlen(napis));
+                    break;
+                }
+            }
+
+            free(napis);
+
+        } else {
+            GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
+            GtkWidget* dialog = gtk_message_dialog_new(NULL, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", "Problem with loading file.");
+
+            g_signal_connect (dialog, "response", G_CALLBACK(gtk_window_destroy), NULL);
+
+            gtk_widget_show (dialog);
+        }
+        
+        g_object_unref(file);
+    }
+    g_object_unref(native);
+}
+
+static void save_to_file(GtkNativeDialog* native, gint response) {
+if (response == GTK_RESPONSE_ACCEPT) {
+        GtkFileChooser* chooser = GTK_FILE_CHOOSER(native);
+        GFile* file = gtk_file_chooser_get_file(chooser);        
+        GError* error = NULL;
+
+        GOutputStream* stream = G_OUTPUT_STREAM(g_file_create(file, G_FILE_CREATE_NONE, NULL, &error));
+
+        if (error && error->code == G_IO_ERROR_EXISTS) {
+            stream = g_io_stream_get_output_stream(G_IO_STREAM(g_file_open_readwrite(file, NULL, NULL)));
+        } else if (error && error->code != 0) {
+            GtkDialogFlags flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
+            GtkWidget* dialog = gtk_message_dialog_new(NULL, flags, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", "Can not save file!");
+
+            g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+
+            gtk_widget_show (dialog);
+        }
+
+        for(gint i = 0; i < 4; i++) {
+            g_output_stream_printf(stream, NULL, NULL, NULL, "%s\n", gtk_entry_buffer_get_text(wdata.equationBuffer[i]));
+        }
+        g_object_unref(stream);
+        g_object_unref(file);
+    }
+    g_object_unref(native);
 }
 
 static void checkbox_rasterization_toggle (GtkWidget* widget, gpointer data) {
