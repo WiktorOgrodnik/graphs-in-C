@@ -263,13 +263,13 @@ static Expr* read_value (char** inp, int* error, char* message) {
             if (!found) {
                 
                 *error = 1;
-                sprintf (message, function);
+                sprintf (message, "%s", function);
 
                 ex->tag = ERROR_EXPR;
                 ex->val1.error = 1;
 
                 ex->val2.message = (char*) malloc ((strlen (function) + 1) * sizeof (char));
-                sprintf (ex->val2.message, function);
+                sprintf (ex->val2.message, "%s", function);
                 return ex;
             }
         }
@@ -498,7 +498,7 @@ static Expr* exponent (char** inp, int* error, char* message) { //exponent can b
         res->tag = ERROR_EXPR;
         res->val1.error = 2;
         res->val2.message = (char*) malloc (sizeof (char) * 5);
-        sprintf (res->val2.message, *inp);
+        sprintf (res->val2.message, "%s", *inp);
 
         return res;
     }

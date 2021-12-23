@@ -25,7 +25,7 @@ int main (int argc, char* argv[]) {
     // Create application
     app = gtk_application_new ("wiktor.ogrodnik.uwr.wykresy", G_APPLICATION_FLAGS_NONE);
     g_signal_connect (app, "activate", G_CALLBACK(activate), NULL);
-
+    
     // Run application
     int status = g_application_run (G_APPLICATION(app), argc, argv);
 
