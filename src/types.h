@@ -1,8 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#define WINDOWS
-
 #ifdef WINDOWS
 #define _USE_MATH_DEFINES
 #else

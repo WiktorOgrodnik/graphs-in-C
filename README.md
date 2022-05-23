@@ -10,7 +10,7 @@ Program wykresy służy do rysowania wykresów jednej zmiennej w zadanym przedzi
 
 Technologie użyte do stworzenia programu to:
 
-1. Język C11 (GCC 10.2),
+1. Język C11,
 2. Biblioteka GTK 4.0,
 3. Program make,
 4. Visual Studio Code.

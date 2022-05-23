@@ -133,7 +133,7 @@ static int read_char (char** inp) {
 
 static Expr* read_value (char** inp, int* error, char* message) {
     
-    int c;
+    int c = 0;
     double n = 0.0, exp10 = 1.0;
     bool isNum = false;
     bool isFunction = false;
@@ -165,15 +165,15 @@ static Expr* read_value (char** inp, int* error, char* message) {
         ex->val1.data = n / exp10;
     }
 
-    if (c == 'x') { //Variable
+    if (**inp == 'x') { //Variable
 
         if (isNum) {
             
             Expr *ex1, *ex2;
 
             // If previously there was a number, create a multiplication node
-            if ((ex1 = (Expr*) malloc (sizeof (Expr))) == NULL || (ex2 = (Expr*) malloc (sizeof (Expr))) == NULL)
-                return runtime_error (error, message);
+            if ((ex1 = (Expr*) malloc(sizeof (Expr))) == NULL || (ex2 = (Expr*) malloc (sizeof (Expr))) == NULL)
+                return runtime_error(error, message);
 
             ex1->tag = CONST_EXPR;
             ex2->tag = VAR_EXPR;
@@ -191,7 +191,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
         c = *(*inp)++;
     }
 
-    else if (isalpha (c)) { // Function module
+    else if (isalpha (**inp)) { // Function module
 
         int it = 0;
         char function [10];
