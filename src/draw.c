@@ -7,7 +7,7 @@ static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green
 static void draw_rasterizaton (eqData* data, Expr* expression, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color, bool darkmode);
 static double char_to_double (const char str []);
 
-void draw_chart (eqData* data, char* error_message) {
+void draw_chart(eqData* data, char* error_message) {
     /**
      * @brief Draw chart on screen
      * 
@@ -18,15 +18,15 @@ void draw_chart (eqData* data, char* error_message) {
     gdouble l, p, delta, scale;
     
     //get text from GtkEntryBuffer
-    interval = gtk_entry_buffer_get_text (data->intervalBuffer);
-    scale_ = gtk_entry_buffer_get_text (data->scaleBuffer);
+    interval = gtk_entry_buffer_get_text(data->intervalBuffer);
+    scale_ = gtk_entry_buffer_get_text(data->scaleBuffer);
 
     //convert string to double
-    if (strcmp (interval, "") == 0) l = 10.0;
-    else l = char_to_double (interval);
+    if (strcmp(interval, "") == 0) l = 10.0;
+    else l = char_to_double(interval);
 
-    if (strcmp (scale_, "") == 0) scale = 40.0;
-    else scale = char_to_double (scale_);
+    if (strcmp(scale_, "") == 0) scale = 40.0;
+    else scale = char_to_double(scale_);
 
     p = l;
     l *= -1;
@@ -35,13 +35,13 @@ void draw_chart (eqData* data, char* error_message) {
     delta = (p - l) / CHART_WIDTH;
 
     gdouble results[4][CHART_WIDTH];
-    Expr* expressions [4];
+    Expr* expressions[4];
 
     //initialize array with results (one for each equation)
     for (gint i = 0; i < 4; i++) {
         expressions [i] = NULL;
         for (gint j = 0; j < CHART_WIDTH; j++)
-            results[i][j] = nan ("out");
+            results[i][j] = nan("out");
     }
 
     data->chartData = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8, CHART_WIDTH, CHART_HEIGHT);
@@ -49,42 +49,43 @@ void draw_chart (eqData* data, char* error_message) {
 
     //The loop is run 4 times, once for each parse 
     for (gint i = 3; i >= 0; i--) {
-        equation = gtk_entry_buffer_get_text (data->equationBuffer[i]);
+        equation = gtk_entry_buffer_get_text(data->equationBuffer[i]);
 
         int error = 0;
-        char message [100];
-        error_message [0] = message [0] = '\0';
+        char message[100];
+        error_message[0] = message[0] = '\0';
         
-        expressions [i] = parse (equation, &error, message);
-
-        if (!strlen (equation) || expressions [i] == NULL) continue;
+        expressions[i] = parse(equation, &error, message);
 
         if (error) {
-
-            switch (error)
-            {
+            switch(error) {
                 case 1:
-                    sprintf (error_message, "PARSE ERROR: Can not find: %s", message);
+                    sprintf(error_message, "PARSE ERROR: Can not find: %s", message);
                     break;
                 case 2:
-                    sprintf (error_message, "PARSE ERROR: expected number or '(', or '|', or '{', or '['");
+                    sprintf(error_message, "PARSE ERROR: expected number or '(', or '|', or '{', or '['");
                     break;
                 case 3:
-                    sprintf (error_message, "PARSE ERROR: Incorrect parenthesis, expected: '%s'", message);
+                    sprintf(error_message, "PARSE ERROR: Incorrect parenthesis, expected: '%s'", message);
                     break;
                 case 4:
-                    sprintf (error_message, "RUNTIME ERROR: Critical error, can not allocate memory!");
+                    sprintf(error_message, "RUNTIME ERROR: Critical error, can not allocate memory!");
                     break;
                 //case 5: 
                     //sprintf (error_message, "PARSE ERROR: Empty string!");
                     //break;
+                case 6:
+                    sprintf(error_message, "PARSE ERROR: No parser included!");
+                    break;
                 default:
-                    sprintf (error_message, "PARSE ERROR: Unknown error!");
+                    sprintf(error_message, "PARSE ERROR: Unknown error!");
                     break;
             }
 
             if (error != 5) return;
         }
+
+        if (!strlen(equation) || expressions[i] == NULL) continue;
 
         for (gint j = 0; j < CHART_WIDTH; j++) {
             
@@ -109,14 +110,14 @@ void draw_chart (eqData* data, char* error_message) {
     //draw and rasterization
     for (gint k = 3; k >= 0; k--)
         for (gint i = 0; i < CHART_WIDTH; i++) {
-            results [k][i] = (gint)((CHART_HEIGHT / 2) - results [k][i] * scale);
+            results [k][i] = (gint)((CHART_HEIGHT / 2) - results[k][i] * scale);
 
-            if (!isnan (results [k][i]) && results [k][i] >=0 && results [k][i] <= CHART_HEIGHT) {
+            if (!isnan(results [k][i]) && results[k][i] >=0 && results[k][i] <= CHART_HEIGHT) {
                 // Diffrent line for each color
-                if (k == 0) put_pixel (data->chartData, i, results [k][i], 0u, 0u, 255u, 255u, data->darkmode);
-                else if (k == 1) put_pixel (data->chartData, i, results [k][i], 255u, 0u, 0u, 255u, data->darkmode);
-                else if (k == 2) put_pixel (data->chartData, i, results [k][i], 0u, 255u, 0u, 255u, data->darkmode);
-                else put_pixel (data->chartData, i, results [k][i], 125u, 27u, 186u, 255u, data->darkmode);
+                if (k == 0) put_pixel(data->chartData, i, results[k][i], 0u, 0u, 255u, 255u, data->darkmode);
+                else if (k == 1) put_pixel(data->chartData, i, results[k][i], 255u, 0u, 0u, 255u, data->darkmode);
+                else if (k == 2) put_pixel(data->chartData, i, results[k][i], 0u, 255u, 0u, 255u, data->darkmode);
+                else put_pixel(data->chartData, i, results[k][i], 125u, 27u, 186u, 255u, data->darkmode);
             }
 
             if (i && !isnan(results[k][i]) && data->rasterization)
@@ -139,19 +140,19 @@ static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green
 
     n_channels = gdk_pixbuf_get_n_channels (pixbuf);
 
-    g_assert (gdk_pixbuf_get_colorspace (pixbuf) == GDK_COLORSPACE_RGB);
-    g_assert (gdk_pixbuf_get_bits_per_sample (pixbuf) == 8);
-    g_assert (gdk_pixbuf_get_has_alpha (pixbuf));
-    g_assert (n_channels == 4);
+    g_assert(gdk_pixbuf_get_colorspace (pixbuf) == GDK_COLORSPACE_RGB);
+    g_assert(gdk_pixbuf_get_bits_per_sample (pixbuf) == 8);
+    g_assert(gdk_pixbuf_get_has_alpha (pixbuf));
+    g_assert(n_channels == 4);
 
-    width = gdk_pixbuf_get_width (pixbuf);
-    height = gdk_pixbuf_get_height (pixbuf);
+    width = gdk_pixbuf_get_width(pixbuf);
+    height = gdk_pixbuf_get_height(pixbuf);
 
     if (x < 0 || x >= width) return;
     if (y < 0 || y >= height) return;
 
-    rowstride = gdk_pixbuf_get_rowstride (pixbuf);
-    pixels = gdk_pixbuf_get_pixels (pixbuf);
+    rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+    pixels = gdk_pixbuf_get_pixels(pixbuf);
 
     p = pixels + y * rowstride + x * n_channels;
 
@@ -161,10 +162,10 @@ static void put_pixel (GdkPixbuf* pixbuf, int x, int y, guchar red, guchar green
         blue = 255 - blue;
     }
 
-    p [0] = red;
-    p [1] = green;
-    p [2] = blue;
-    p [3] = alpha;
+    p[0] = red;
+    p[1] = green;
+    p[2] = blue;
+    p[3] = alpha;
 }
 
 static void draw_rasterizaton (eqData* data, Expr* expression, gdouble wyniki[], gint column, gdouble l, gdouble delta, gint color, bool darkmode) {

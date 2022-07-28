@@ -55,3 +55,6 @@ obj
 wykresy
 wykresy.exe
 .vscode
+
+# Parser and evaluate module
+graphs-in-C-core

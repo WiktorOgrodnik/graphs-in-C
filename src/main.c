@@ -1,4 +1,8 @@
-#include "main.h"
+#include "draw.h"
+
+GtkApplication* app;
+GObject* window;
+eqData wdata;
 
 /*** Local functions declarations ***/
 static void activate(GtkApplication* app, gpointer data);
@@ -25,7 +29,7 @@ static GActionEntry app_entries[] = {
 
 int main(int argc, char* argv[]) {
 #ifdef GTK_SRCDIR
-    g_chdir (GTK_SRCDIR);
+    g_chdir(GTK_SRCDIR);
 #endif
 
     // Create application
@@ -127,21 +131,21 @@ static void activate(GtkApplication* app, gpointer data) {
     }
 
     // Initialize button
-    GObject* button = gtk_builder_get_object (builder, "buttonRun");
-    g_signal_connect_swapped (button, "clicked", G_CALLBACK (calculate), window);
+    GObject* button = gtk_builder_get_object(builder, "buttonRun");
+    g_signal_connect_swapped(button, "clicked", G_CALLBACK(calculate), window);
 
     wdata.rasterization = true;
 
     // Initialize checkboxes
-    GObject* checkBox = gtk_builder_get_object (builder, "checkbox1");
-    g_signal_connect (checkBox, "toggled", G_CALLBACK (checkbox_rasterization_toggle), &wdata);
+    GObject* checkBox = gtk_builder_get_object(builder, "checkbox1");
+    g_signal_connect(checkBox, "toggled", G_CALLBACK (checkbox_rasterization_toggle), &wdata);
 
-    checkBox = gtk_builder_get_object (builder, "checkbox2");
-    g_signal_connect (checkBox, "toggled", G_CALLBACK (checkbox_experimental_toggle), &wdata);
+    checkBox = gtk_builder_get_object(builder, "checkbox2");
+    g_signal_connect(checkBox, "toggled", G_CALLBACK (checkbox_experimental_toggle), &wdata);
 
-    gtk_widget_show (GTK_WIDGET (window));
+    gtk_widget_show(GTK_WIDGET(window));
 
-    g_object_unref (builder);
+    g_object_unref(builder);
 }
 
 static void calculate(GtkWindow* window) {
@@ -150,7 +154,7 @@ static void calculate(GtkWindow* window) {
      * 
      * @return void
      */
-    char message[100]; message[0] = '\0';
+    char message[100];
     draw_chart(&wdata, message);
 
     if (strlen(message)) {
@@ -180,12 +184,12 @@ static void about(GSimpleAction* action, GVariant* parameter, gpointer user_data
      * @return void
      */
 
-    const char license[] = "MIT License\n\nCopyright (c) 2021 Wiktor Ogrodnik\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n";
+    const char license[] = "MIT License\n\nCopyright (c) 2022 Wiktor Ogrodnik\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n";
 
     GtkWidget* about = gtk_about_dialog_new();
     gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(about), "Wykresy");
-    gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about), "0.21");
-    gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(about), "c Wiktor Ogrodnik 2021");
+    gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about), "0.22");
+    gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(about), "c Wiktor Ogrodnik 2022");
     gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(about), license);
 
     gtk_widget_show(about);
