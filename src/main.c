@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 #endif
 
     // Create application
-    app = gtk_application_new("wiktor.ogrodnik.uwr.wykresy", G_APPLICATION_FLAGS_NONE);
+    app = gtk_application_new("wiktor.ogrodnik.graphs", G_APPLICATION_FLAGS_NONE);
     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
     
     // Run application
@@ -187,7 +187,7 @@ static void about(GSimpleAction* action, GVariant* parameter, gpointer user_data
     const char license[] = "MIT License\n\nCopyright (c) 2022 Wiktor Ogrodnik\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n";
 
     GtkWidget* about = gtk_about_dialog_new();
-    gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(about), "Wykresy");
+    gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(about), "Graphs in C");
     gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(about), "0.22");
     gtk_about_dialog_set_copyright(GTK_ABOUT_DIALOG(about), "c Wiktor Ogrodnik 2022");
     gtk_about_dialog_set_license(GTK_ABOUT_DIALOG(about), license);

@@ -6,7 +6,7 @@ PARSER_DIR = graphs-in-C-core
 CFLAGS = -std=gnu18 -Wall -Wextra -Wpedantic -Wno-unused-parameter -O3
 GTK = `pkg-config --cflags gtk4` -lm
 LIBS = `pkg-config --libs gtk4` -lm
-NAME = wykresy
+NAME = graphs
 
 OBJS = $(addprefix $(OBJ_DIR)/, main.o draw.o eval.o parse.o) #default
 
