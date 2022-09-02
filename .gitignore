@@ -52,8 +52,8 @@ Mkfile.old
 dkms.conf
 
 obj
-wykresy
-wykresy.exe
+graphs
+graphs.exe
 .vscode
 
 # Parser and evaluate module

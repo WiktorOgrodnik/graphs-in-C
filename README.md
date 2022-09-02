@@ -27,6 +27,8 @@ This repo contains only the display engine. The parser and evaluator was moved t
 
 ## How to write equations?
 
+In the program, you can enter 4 equations at once, which will be displayed on a graph. The graphs have different colors, blue, red, green and purple, respectively.
+
 Instructions were moved to [another repo](https://github.com/WiktorOgrodnik/graphs-in-C-core).
 
 ## Settings

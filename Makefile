@@ -27,4 +27,4 @@ clean:
 	@if [ -d "$(OBJ_DIR)" ]; then rm -r -f $(OBJ_DIR); fi;
 
 distclean: clean
-	@rm -f $(NAME)
+	@rm -f $(NAME) $(NAME).exe

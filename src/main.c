@@ -174,7 +174,7 @@ static void quit(GSimpleAction* action, GVariant* parameter, gpointer user_data)
      * @return void
      */
 
-    g_application_quit(G_APPLICATION (app));
+    g_application_quit(G_APPLICATION(app));
 }
 
 static void about(GSimpleAction* action, GVariant* parameter, gpointer user_data) {
